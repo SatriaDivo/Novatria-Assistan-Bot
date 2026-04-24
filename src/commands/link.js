@@ -2,8 +2,10 @@ const { EmbedBuilder } = require("discord.js");
 const getTargetChannel = require("../utils/getTargetChannel");
 const kirimKeChannel = require("../utils/kirimKeChannel");
 const simpanKeSheet = require("../utils/sheet");
+const buatId = require("../utils/buatId");
 
 async function execute(interaction) {
+  const id = buatId("link");
   const url = interaction.options.getString("url");
   const judul = interaction.options.getString("judul");
   const catatan = interaction.options.getString("catatan") || "-";
@@ -28,7 +30,10 @@ async function execute(interaction) {
     .setTitle(`🔗 ${judul}`)
     .setURL(url)
     .setDescription(catatan)
-    .addFields({ name: "URL", value: url })
+    .addFields(
+      { name: "ID", value: id, inline: true },
+      { name: "URL", value: url }
+    )
     .setFooter({ text: `Dibuat oleh ${interaction.user.tag}` })
     .setTimestamp();
 
@@ -41,6 +46,7 @@ async function execute(interaction) {
   }
 
   await simpanKeSheet("link", {
+    id,
     user: interaction.user.tag,
     userId: interaction.user.id,
     server: interaction.guild.name,
@@ -51,7 +57,7 @@ async function execute(interaction) {
   });
 
   await interaction.editReply({
-    content: `✅ Link berhasil dikirim ke ${channelLink}.`,
+    content: `✅ Link berhasil dikirim ke ${channelLink}. ID: \`${id}\``,
   });
 }
 

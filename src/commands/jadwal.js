@@ -2,8 +2,10 @@ const { EmbedBuilder } = require("discord.js");
 const getTargetChannel = require("../utils/getTargetChannel");
 const kirimKeChannel = require("../utils/kirimKeChannel");
 const simpanKeSheet = require("../utils/sheet");
+const buatId = require("../utils/buatId");
 
 async function execute(interaction) {
+  const id = buatId("jadwal");
   const judul = interaction.options.getString("judul");
   const tanggal = interaction.options.getString("tanggal");
   const jam = interaction.options.getString("jam");
@@ -26,6 +28,7 @@ async function execute(interaction) {
     .setColor(0xd29922)
     .setTitle(`📅 ${judul}`)
     .addFields(
+      { name: "ID", value: id, inline: true },
       { name: "Tanggal", value: tanggal, inline: true },
       { name: "Jam", value: jam, inline: true },
       { name: "Catatan", value: catatan }
@@ -42,6 +45,7 @@ async function execute(interaction) {
   }
 
   await simpanKeSheet("jadwal", {
+    id,
     user: interaction.user.tag,
     userId: interaction.user.id,
     server: interaction.guild.name,
@@ -53,7 +57,7 @@ async function execute(interaction) {
   });
 
   await interaction.editReply({
-    content: `✅ Jadwal berhasil dikirim ke ${channelJadwal}.`,
+    content: `✅ Jadwal berhasil dikirim ke ${channelJadwal}. ID: \`${id}\``,
   });
 }
 

@@ -1,5 +1,7 @@
 const ping = require("../commands/ping");
 const status = require("../commands/status");
+const list = require("../commands/list");
+const hapus = require("../commands/hapus");
 const catat = require("../commands/catat");
 const todo = require("../commands/todo");
 const link = require("../commands/link");
@@ -9,6 +11,8 @@ const arsip = require("../commands/arsip");
 const commandHandlers = {
   ping,
   status,
+  list,
+  hapus,
   catat,
   todo,
   link,

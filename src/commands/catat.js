@@ -2,8 +2,10 @@ const { EmbedBuilder } = require("discord.js");
 const getTargetChannel = require("../utils/getTargetChannel");
 const kirimKeChannel = require("../utils/kirimKeChannel");
 const simpanKeSheet = require("../utils/sheet");
+const buatId = require("../utils/buatId");
 
 async function execute(interaction) {
+  const id = buatId("catat");
   const isi = interaction.options.getString("isi");
   const channelCatatan = await getTargetChannel(interaction.guild, "catatan", "catatan");
 
@@ -17,6 +19,7 @@ async function execute(interaction) {
     .setColor(0x4f8cff)
     .setTitle("📝 Catatan Baru")
     .setDescription(isi)
+    .addFields({ name: "ID", value: id, inline: true })
     .setFooter({ text: `Dibuat oleh ${interaction.user.tag}` })
     .setTimestamp();
 
@@ -29,6 +32,7 @@ async function execute(interaction) {
   }
 
   await simpanKeSheet("catat", {
+    id,
     user: interaction.user.tag,
     userId: interaction.user.id,
     server: interaction.guild.name,
@@ -37,7 +41,7 @@ async function execute(interaction) {
   });
 
   await interaction.editReply({
-    content: `✅ Catatan berhasil dikirim ke ${channelCatatan}.`,
+    content: `✅ Catatan berhasil dikirim ke ${channelCatatan}. ID: \`${id}\``,
   });
 }
 

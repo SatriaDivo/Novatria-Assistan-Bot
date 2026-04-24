@@ -6,6 +6,8 @@ Novatria Assistant Bot adalah Discord bot berbasis Node.js dan discord.js v14 un
 
 - `/ping` untuk mengecek bot aktif.
 - `/status` untuk mengecek channel target, permission bot, dan konfigurasi Google Sheet.
+- `/list tipe limit` untuk melihat data terbaru beserta ID sebelum menghapus.
+- `/hapus tipe id` untuk menghapus data dari Google Sheet berdasarkan ID.
 - `/catat isi` untuk mengirim catatan ke channel catatan dan menyimpan ke sheet `Catatan`.
 - `/todo tugas` untuk mengirim todo ke channel todo-list dan menyimpan ke sheet `Todo`.
 - `/link url judul catatan` untuk mengirim link penting dan menyimpan ke sheet `Link`.
@@ -18,6 +20,7 @@ Novatria Assistant Bot adalah Discord bot berbasis Node.js dan discord.js v14 un
 Novatria-Bot
 ├─ .env.example
 ├─ .gitignore
+├─ google-apps-script.js
 ├─ package.json
 ├─ index.js
 └─ src
@@ -26,6 +29,8 @@ Novatria-Bot
    │  ├─ definitions.js
    │  ├─ ping.js
    │  ├─ status.js
+   │  ├─ list.js
+   │  ├─ hapus.js
    │  ├─ catat.js
    │  ├─ todo.js
    │  ├─ link.js
@@ -37,6 +42,7 @@ Novatria-Bot
       ├─ cariChannel.js
       ├─ getTargetChannel.js
       ├─ kirimKeChannel.js
+      ├─ buatId.js
       └─ sheet.js
 ```
 
@@ -125,14 +131,18 @@ Pastikan Apps Script:
 
 - Memiliki fungsi `doPost(e)`.
 - Memvalidasi `secret`.
-- Menyimpan data berdasarkan `type`.
+- Menyimpan, membaca, dan menghapus data berdasarkan `type`.
 - Dideploy sebagai Web App.
+
+Kode lengkap Apps Script tersedia di `google-apps-script.js`. Jika memakai fitur `/list` dan `/hapus`, paste ulang isi file itu ke Google Apps Script lalu deploy versi Web App terbaru.
 
 ## Command Contoh
 
 ```text
 /ping
 /status
+/list tipe: Todo limit: 10
+/hapus tipe: Todo id: TODO-MABC1234-ABCD
 /catat isi: test catatan
 /todo tugas: belajar discord bot
 /link url: https://example.com judul: Contoh catatan: testing link

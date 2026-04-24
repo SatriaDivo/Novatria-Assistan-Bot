@@ -1,0 +1,193 @@
+const SPREADSHEET_ID = "LINK-SHEET-ID-ANDA";
+const SECRET_KEY = "novatria-secret-123";
+
+const ID_PREFIXES = {
+  catat: "CAT",
+  todo: "TODO",
+  link: "LINK",
+  jadwal: "JAD",
+  arsip: "ARS",
+  log: "LOG",
+};
+
+const CONFIG = {
+  catat: {
+    sheet: "Catatan",
+    header: ["ID", "Waktu", "User", "User ID", "Server", "Channel", "Isi"],
+    row: data => [data.id, new Date(), data.user, data.userId, data.server, data.channel, data.isi],
+  },
+  todo: {
+    sheet: "Todo",
+    header: ["ID", "Waktu", "User", "User ID", "Server", "Channel", "Tugas", "Status"],
+    row: data => [data.id, new Date(), data.user, data.userId, data.server, data.channel, data.tugas, data.status],
+  },
+  link: {
+    sheet: "Link",
+    header: ["ID", "Waktu", "User", "User ID", "Server", "Channel", "Judul", "URL", "Catatan"],
+    row: data => [data.id, new Date(), data.user, data.userId, data.server, data.channel, data.judul, data.url, data.catatan],
+  },
+  jadwal: {
+    sheet: "Jadwal",
+    header: ["ID", "Waktu", "User", "User ID", "Server", "Channel", "Judul", "Tanggal", "Jam", "Catatan"],
+    row: data => [data.id, new Date(), data.user, data.userId, data.server, data.channel, data.judul, data.tanggal, data.jam, data.catatan],
+  },
+  arsip: {
+    sheet: "Arsip",
+    header: ["ID", "Waktu", "User", "User ID", "Server", "Channel", "Isi"],
+    row: data => [data.id, new Date(), data.user, data.userId, data.server, data.channel, data.isi],
+  },
+  log: {
+    sheet: "Log",
+    header: ["ID", "Waktu", "Type", "User", "User ID", "Server", "Channel", "Data"],
+    row: (data, type) => [data.id || "", new Date(), type, data.user, data.userId, data.server, data.channel, JSON.stringify(data)],
+  },
+};
+
+function doPost(e) {
+  try {
+    const body = JSON.parse(e.postData.contents);
+
+    if (body.secret !== SECRET_KEY) {
+      return json({ ok: false, error: "Secret tidak valid" });
+    }
+
+    const action = body.action || "append";
+    const type = body.type || "log";
+    const data = body.data || {};
+    const config = CONFIG[type] || CONFIG.log;
+    const spreadsheet = SpreadsheetApp.openById(SPREADSHEET_ID);
+    const sheet = getSheet(spreadsheet, config.sheet, config.header, type);
+
+    if (action === "append") {
+      const row = config === CONFIG.log ? config.row(data, type) : config.row(data);
+      sheet.appendRow(row);
+      return json({ ok: true, id: data.id || "" });
+    }
+
+    if (action === "list") {
+      const limit = Math.min(Number(data.limit || 10), 20);
+      return json({ ok: true, items: listRows(sheet, config.header, limit) });
+    }
+
+    if (action === "delete") {
+      const deleted = deleteById(sheet, String(data.id || ""));
+      return json({ ok: true, deleted });
+    }
+
+    return json({ ok: false, error: "Action tidak dikenal" });
+  } catch (error) {
+    return json({ ok: false, error: error.message });
+  }
+}
+
+function getSheet(spreadsheet, name, header, type) {
+  let sheet = spreadsheet.getSheetByName(name);
+
+  if (!sheet) {
+    sheet = spreadsheet.insertSheet(name);
+  }
+
+  ensureHeader(sheet, header, type);
+  return sheet;
+}
+
+function ensureHeader(sheet, header, type) {
+  if (sheet.getLastRow() === 0) {
+    sheet.getRange(1, 1, 1, header.length).setValues([header]);
+    sheet.setFrozenRows(1);
+    return;
+  }
+
+  if (header[0] === "ID" && sheet.getRange(1, 1).getValue() !== "ID") {
+    sheet.insertColumnBefore(1);
+  }
+
+  sheet.getRange(1, 1, 1, header.length).setValues([header]);
+  sheet.setFrozenRows(1);
+  backfillMissingIds(sheet, type, header.length);
+}
+
+function backfillMissingIds(sheet, type, width) {
+  const lastRow = sheet.getLastRow();
+
+  if (lastRow <= 1) {
+    return;
+  }
+
+  const range = sheet.getRange(2, 1, lastRow - 1, width);
+  const values = range.getValues();
+  let changed = false;
+
+  values.forEach(row => {
+    const hasData = row.slice(2).some(value => value !== "");
+
+    if (hasData && !row[0]) {
+      row[0] = makeId(type);
+      changed = true;
+    }
+  });
+
+  if (changed) {
+    range.setValues(values);
+  }
+}
+
+function makeId(type) {
+  const prefix = ID_PREFIXES[type] || "LOG";
+  const waktu = Date.now().toString(36).toUpperCase();
+  const acak = Math.random().toString(36).slice(2, 6).toUpperCase();
+
+  return `${prefix}-${waktu}-${acak}`;
+}
+
+function listRows(sheet, header, limit) {
+  const lastRow = sheet.getLastRow();
+
+  if (lastRow <= 1) {
+    return [];
+  }
+
+  const values = sheet.getRange(2, 1, lastRow - 1, header.length).getValues();
+
+  return values
+    .filter(row => hasMeaningfulData(row))
+    .slice(-limit)
+    .reverse()
+    .map(row => {
+      const item = {};
+
+      header.forEach((title, index) => {
+        item[title] = row[index] instanceof Date ? row[index].toISOString() : row[index];
+      });
+
+      return item;
+    });
+}
+
+function hasMeaningfulData(row) {
+  return row.slice(2).some(value => value !== "");
+}
+
+function deleteById(sheet, id) {
+  if (!id || sheet.getLastRow() <= 1) {
+    return false;
+  }
+
+  const idColumn = 1;
+  const ids = sheet.getRange(2, idColumn, sheet.getLastRow() - 1, 1).getValues();
+
+  for (let index = ids.length - 1; index >= 0; index--) {
+    if (String(ids[index][0]) === id) {
+      sheet.deleteRow(index + 2);
+      return true;
+    }
+  }
+
+  return false;
+}
+
+function json(payload) {
+  return ContentService
+    .createTextOutput(JSON.stringify(payload))
+    .setMimeType(ContentService.MimeType.JSON);
+}

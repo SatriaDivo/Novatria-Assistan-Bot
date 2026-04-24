@@ -2,8 +2,10 @@ const { EmbedBuilder } = require("discord.js");
 const getTargetChannel = require("../utils/getTargetChannel");
 const kirimKeChannel = require("../utils/kirimKeChannel");
 const simpanKeSheet = require("../utils/sheet");
+const buatId = require("../utils/buatId");
 
 async function execute(interaction) {
+  const id = buatId("arsip");
   const isi = interaction.options.getString("isi");
   const channelArsip = await getTargetChannel(interaction.guild, "arsip", "arsip");
 
@@ -17,6 +19,7 @@ async function execute(interaction) {
     .setColor(0x8b949e)
     .setTitle("🗄️ Arsip Baru")
     .setDescription(isi)
+    .addFields({ name: "ID", value: id, inline: true })
     .setFooter({ text: `Dibuat oleh ${interaction.user.tag}` })
     .setTimestamp();
 
@@ -29,6 +32,7 @@ async function execute(interaction) {
   }
 
   await simpanKeSheet("arsip", {
+    id,
     user: interaction.user.tag,
     userId: interaction.user.id,
     server: interaction.guild.name,
@@ -37,7 +41,7 @@ async function execute(interaction) {
   });
 
   await interaction.editReply({
-    content: `✅ Arsip berhasil dikirim ke ${channelArsip}.`,
+    content: `✅ Arsip berhasil dikirim ke ${channelArsip}. ID: \`${id}\``,
   });
 }
 

@@ -11,6 +11,54 @@ const commands = [
     .setDescription("Cek konfigurasi channel dan Google Sheet"),
 
   new SlashCommandBuilder()
+    .setName("list")
+    .setDescription("Lihat data terbaru sebelum menghapus")
+    .addStringOption(option =>
+      option
+        .setName("tipe")
+        .setDescription("Jenis data yang ingin dilihat")
+        .setRequired(true)
+        .addChoices(
+          { name: "Catatan", value: "catat" },
+          { name: "Todo", value: "todo" },
+          { name: "Link", value: "link" },
+          { name: "Jadwal", value: "jadwal" },
+          { name: "Arsip", value: "arsip" }
+        )
+    )
+    .addIntegerOption(option =>
+      option
+        .setName("limit")
+        .setDescription("Jumlah data yang ditampilkan")
+        .setMinValue(1)
+        .setMaxValue(20)
+        .setRequired(false)
+    ),
+
+  new SlashCommandBuilder()
+    .setName("hapus")
+    .setDescription("Hapus data dari Google Sheet berdasarkan ID")
+    .addStringOption(option =>
+      option
+        .setName("tipe")
+        .setDescription("Jenis data yang ingin dihapus")
+        .setRequired(true)
+        .addChoices(
+          { name: "Catatan", value: "catat" },
+          { name: "Todo", value: "todo" },
+          { name: "Link", value: "link" },
+          { name: "Jadwal", value: "jadwal" },
+          { name: "Arsip", value: "arsip" }
+        )
+    )
+    .addStringOption(option =>
+      option
+        .setName("id")
+        .setDescription("ID data dari hasil /list")
+        .setRequired(true)
+    ),
+
+  new SlashCommandBuilder()
     .setName("catat")
     .setDescription("Kirim catatan ke channel catatan")
     .addStringOption(option =>

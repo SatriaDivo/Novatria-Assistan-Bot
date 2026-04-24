@@ -2,8 +2,10 @@ const { EmbedBuilder } = require("discord.js");
 const getTargetChannel = require("../utils/getTargetChannel");
 const kirimKeChannel = require("../utils/kirimKeChannel");
 const simpanKeSheet = require("../utils/sheet");
+const buatId = require("../utils/buatId");
 
 async function execute(interaction) {
+  const id = buatId("todo");
   const tugas = interaction.options.getString("tugas");
   const channelTodo = await getTargetChannel(interaction.guild, "todo", "todo-list");
 
@@ -17,7 +19,10 @@ async function execute(interaction) {
     .setColor(0x3fb950)
     .setTitle("✅ Todo Baru")
     .setDescription(`☐ ${tugas}`)
-    .addFields({ name: "Status", value: "Belum selesai", inline: true })
+    .addFields(
+      { name: "ID", value: id, inline: true },
+      { name: "Status", value: "Belum selesai", inline: true }
+    )
     .setFooter({ text: `Dibuat oleh ${interaction.user.tag}` })
     .setTimestamp();
 
@@ -30,6 +35,7 @@ async function execute(interaction) {
   }
 
   await simpanKeSheet("todo", {
+    id,
     user: interaction.user.tag,
     userId: interaction.user.id,
     server: interaction.guild.name,
@@ -39,7 +45,7 @@ async function execute(interaction) {
   });
 
   await interaction.editReply({
-    content: `✅ Todo berhasil dikirim ke ${channelTodo}.`,
+    content: `✅ Todo berhasil dikirim ke ${channelTodo}. ID: \`${id}\``,
   });
 }
 
