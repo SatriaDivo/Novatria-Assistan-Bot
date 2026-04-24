@@ -1,5 +1,5 @@
-const SPREADSHEET_ID = "LINK-SHEET-ID-ANDA";
-const SECRET_KEY = "novatria-secret-123";
+const FALLBACK_SPREADSHEET_ID = "LINK-SHEET-ID-ANDA";
+const SCRIPT_VERSION = "2026-04-25-status-v1";
 
 const ID_PREFIXES = {
   catat: "CAT",
@@ -46,8 +46,13 @@ const CONFIG = {
 function doPost(e) {
   try {
     const body = JSON.parse(e.postData.contents);
+    const expectedSecret = getSecretKey();
 
-    if (body.secret !== SECRET_KEY) {
+    if (!expectedSecret) {
+      return json({ ok: false, error: "SECRET_KEY belum diatur di Script Properties." });
+    }
+
+    if (body.secret !== expectedSecret) {
       return json({ ok: false, error: "Secret tidak valid" });
     }
 
@@ -55,7 +60,24 @@ function doPost(e) {
     const type = body.type || "log";
     const data = body.data || {};
     const config = CONFIG[type] || CONFIG.log;
-    const spreadsheet = SpreadsheetApp.openById(SPREADSHEET_ID);
+
+    const spreadsheetId = getSpreadsheetId();
+
+    if (!spreadsheetId || spreadsheetId === "LINK-SHEET-ID-ANDA") {
+      return json({ ok: false, error: "SPREADSHEET_ID belum diatur di Script Properties atau kode Apps Script." });
+    }
+
+    const spreadsheet = SpreadsheetApp.openById(spreadsheetId);
+
+    if (action === "status") {
+      return json({
+        ok: true,
+        version: SCRIPT_VERSION,
+        spreadsheetName: spreadsheet.getName(),
+        sheets: Object.keys(CONFIG).map(key => CONFIG[key].sheet),
+      });
+    }
+
     const sheet = getSheet(spreadsheet, config.sheet, config.header, type);
 
     if (action === "append") {
@@ -78,6 +100,14 @@ function doPost(e) {
   } catch (error) {
     return json({ ok: false, error: error.message });
   }
+}
+
+function getSecretKey() {
+  return PropertiesService.getScriptProperties().getProperty("SECRET_KEY");
+}
+
+function getSpreadsheetId() {
+  return PropertiesService.getScriptProperties().getProperty("SPREADSHEET_ID") || FALLBACK_SPREADSHEET_ID;
 }
 
 function getSheet(spreadsheet, name, header, type) {

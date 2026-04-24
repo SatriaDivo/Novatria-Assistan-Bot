@@ -20,7 +20,14 @@ async function requestSheet(action, type, data = {}) {
     }),
   });
 
-  const result = await response.json();
+  const text = await response.text();
+  let result;
+
+  try {
+    result = JSON.parse(text);
+  } catch {
+    throw new Error("Respons Apps Script bukan JSON. Cek SHEET_WEBAPP_URL dan pastikan Web App sudah dideploy.");
+  }
 
   if (!response.ok || !result.ok) {
     throw new Error(result.error || "Gagal menyimpan data ke Google Sheet.");
@@ -49,6 +56,17 @@ async function hapusSheet(type, id) {
   return requestSheet("delete", type, { id });
 }
 
+async function cekSheetStatus() {
+  const result = await requestSheet("status", "log");
+
+  if (!result.version) {
+    throw new Error("Apps Script belum mendukung health check. Paste ulang google-apps-script.js, lalu deploy versi Web App terbaru.");
+  }
+
+  return result;
+}
+
 module.exports = simpanKeSheet;
 module.exports.listSheet = listSheet;
 module.exports.hapusSheet = hapusSheet;
+module.exports.cekSheetStatus = cekSheetStatus;

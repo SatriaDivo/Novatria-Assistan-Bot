@@ -67,7 +67,7 @@ Salin `.env.example` menjadi `.env`, lalu isi nilainya.
 TOKEN=ISI_TOKEN_BOT
 CLIENT_ID=1497290662196936744
 SHEET_WEBAPP_URL=ISI_URL_WEB_APP_GOOGLE_SCRIPT
-SHEET_SECRET=novatria-secret-123
+SHEET_SECRET=ISI_SECRET_YANG_SAMA_DENGAN_APPS_SCRIPT
 CHANNEL_CATATAN_ID=
 CHANNEL_TODO_ID=
 CHANNEL_LINK_ID=
@@ -81,6 +81,7 @@ Catatan:
 - Jangan commit file `.env`.
 - `TOKEN` adalah token bot dari Discord Developer Portal.
 - `SHEET_WEBAPP_URL` adalah URL deploy Google Apps Script Web App.
+- `SHEET_SECRET` harus sama dengan Script Property `SECRET_KEY` di Google Apps Script.
 - Channel ID bersifat opsional. Jika kosong, bot akan mencari channel berdasarkan nama, misalnya `catatan`, `todo-list`, `link-penting`, `jadwal`, dan `arsip`.
 
 ## Menjalankan Bot
@@ -115,9 +116,11 @@ Payload yang dikirim:
 
 ```json
 {
-  "secret": "novatria-secret-123",
+  "secret": "isi-secret-anda",
+  "action": "append",
   "type": "catat",
   "data": {
+    "id": "CAT-MABC1234-ABCD",
     "user": "username#0000",
     "userId": "123",
     "server": "Novatria HQ",
@@ -130,11 +133,22 @@ Payload yang dikirim:
 Pastikan Apps Script:
 
 - Memiliki fungsi `doPost(e)`.
-- Memvalidasi `secret`.
+- Memvalidasi `secret` dari Script Property `SECRET_KEY`.
 - Menyimpan, membaca, dan menghapus data berdasarkan `type`.
 - Dideploy sebagai Web App.
 
-Kode lengkap Apps Script tersedia di `google-apps-script.js`. Jika memakai fitur `/list` dan `/hapus`, paste ulang isi file itu ke Google Apps Script lalu deploy versi Web App terbaru.
+Kode lengkap Apps Script tersedia di `google-apps-script.js`. Jika memakai fitur `/status`, `/list`, dan `/hapus`, paste ulang isi file itu ke Google Apps Script lalu deploy versi Web App terbaru.
+
+### Setup Script Properties
+
+Di Google Apps Script, buka **Project Settings** lalu tambahkan Script Properties berikut:
+
+```text
+SECRET_KEY=isi-secret-anda
+SPREADSHEET_ID=id-google-sheet-anda
+```
+
+Nilai `SECRET_KEY` harus sama dengan `SHEET_SECRET` di `.env`. Setelah mengubah Script Properties atau kode Apps Script, deploy ulang sebagai **New version**.
 
 ## Command Contoh
 

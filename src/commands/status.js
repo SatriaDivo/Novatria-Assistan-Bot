@@ -2,6 +2,7 @@ const { EmbedBuilder } = require("discord.js");
 const config = require("../config");
 const getTargetChannel = require("../utils/getTargetChannel");
 const { cekIzinKirim } = require("../utils/kirimKeChannel");
+const { cekSheetStatus } = require("../utils/sheet");
 
 const targets = [
   { label: "Catatan", key: "catatan", keyword: "catatan" },
@@ -40,9 +41,20 @@ async function execute(interaction) {
     config.sheetSecret
   );
 
+  let sheetStatus = "❌ SHEET_WEBAPP_URL atau SHEET_SECRET belum lengkap";
+
+  if (sheetReady) {
+    try {
+      const result = await cekSheetStatus();
+      sheetStatus = `✅ Terhubung ke \`${result.spreadsheetName || "Google Sheet"}\`\nApps Script: \`${result.version}\``;
+    } catch (error) {
+      sheetStatus = `❌ ${error.message}`;
+    }
+  }
+
   fields.push({
     name: "Google Sheet",
-    value: sheetReady ? "✅ Konfigurasi tersedia" : "❌ SHEET_WEBAPP_URL atau SHEET_SECRET belum lengkap",
+    value: sheetStatus,
   });
 
   const embed = new EmbedBuilder()
