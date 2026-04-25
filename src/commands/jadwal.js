@@ -3,15 +3,15 @@ const cariChannel = require("../utils/cariChannel");
 const simpanKeSheet = require("../utils/sheet");
 const buatId = require("../utils/buatId");
 
-function isValidDate(text) {
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(text)) return false;
+function buatTanggalIso(day, month, year) {
+  const text = `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
 
-  const [year, month, day] = text.split("-").map(Number);
   const date = new Date(Date.UTC(year, month - 1, day));
-
-  return date.getUTCFullYear() === year &&
+  const valid = date.getUTCFullYear() === year &&
     date.getUTCMonth() === month - 1 &&
     date.getUTCDate() === day;
+
+  return valid ? text : null;
 }
 
 function isValidTime(text) {
@@ -21,15 +21,18 @@ function isValidTime(text) {
 async function execute(interaction) {
   const id = buatId("jadwal");
   const judul = interaction.options.getString("judul");
-  const tanggal = interaction.options.getString("tanggal");
+  const tanggalHari = interaction.options.getInteger("tanggal");
+  const bulan = interaction.options.getInteger("bulan");
+  const tahun = interaction.options.getInteger("tahun");
+  const tanggal = buatTanggalIso(tanggalHari, bulan, tahun);
   const jam = interaction.options.getString("jam");
   const selesai = interaction.options.getString("selesai") || "";
   const catatan = interaction.options.getString("catatan") || "-";
   const channelJadwal = cariChannel(interaction.guild, "jadwal");
 
-  if (!isValidDate(tanggal)) {
+  if (!tanggal) {
     return interaction.editReply({
-      content: "❌ Format tanggal tidak valid. Gunakan format `YYYY-MM-DD`, contoh: `2026-04-25`.",
+      content: "❌ Tanggal tidak valid. Cek kombinasi `tanggal`, `bulan`, dan `tahun`. Contoh valid: tanggal `30`, bulan `4`, tahun `2026`.",
     });
   }
 

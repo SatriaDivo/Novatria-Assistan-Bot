@@ -109,10 +109,28 @@ const commands = [
         .setDescription("Judul jadwal")
         .setRequired(true)
     )
-    .addStringOption(option =>
+    .addIntegerOption(option =>
       option
         .setName("tanggal")
-        .setDescription("Tanggal jadwal, format YYYY-MM-DD")
+        .setDescription("Tanggal/hari, contoh: 30")
+        .setMinValue(1)
+        .setMaxValue(31)
+        .setRequired(true)
+    )
+    .addIntegerOption(option =>
+      option
+        .setName("bulan")
+        .setDescription("Bulan, contoh: 4 untuk April")
+        .setMinValue(1)
+        .setMaxValue(12)
+        .setRequired(true)
+    )
+    .addIntegerOption(option =>
+      option
+        .setName("tahun")
+        .setDescription("Tahun, contoh: 2026")
+        .setMinValue(2000)
+        .setMaxValue(2100)
         .setRequired(true)
     )
     .addStringOption(option =>

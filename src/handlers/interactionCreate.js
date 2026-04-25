@@ -40,7 +40,7 @@ async function interactionCreate(interaction) {
     console.error(`Error command /${interaction.commandName}:`, error);
 
     const message = {
-      content: "❌ Terjadi error saat menjalankan command.",
+      content: `❌ Terjadi error saat menjalankan command: ${error.message || "Error tidak diketahui"}`,
     };
 
     try {

@@ -114,6 +114,12 @@ function getSpreadsheetId() {
   return PropertiesService.getScriptProperties().getProperty("SPREADSHEET_ID") || FALLBACK_SPREADSHEET_ID;
 }
 
+function authorizeCalendarAccess() {
+  const calendar = CalendarApp.getDefaultCalendar();
+
+  return calendar.getName();
+}
+
 function createCalendarEvent(data) {
   const start = parseDateTime(data.tanggal, data.jam);
   const end = data.selesai ? parseDateTime(data.tanggal, data.selesai) : new Date(start.getTime() + 60 * 60 * 1000);
