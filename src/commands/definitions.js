@@ -112,14 +112,20 @@ const commands = [
     .addStringOption(option =>
       option
         .setName("tanggal")
-        .setDescription("Tanggal jadwal")
+        .setDescription("Tanggal jadwal, format YYYY-MM-DD")
         .setRequired(true)
     )
     .addStringOption(option =>
       option
         .setName("jam")
-        .setDescription("Jam jadwal")
+        .setDescription("Jam mulai, format HH:mm")
         .setRequired(true)
+    )
+    .addStringOption(option =>
+      option
+        .setName("selesai")
+        .setDescription("Jam selesai, format HH:mm")
+        .setRequired(false)
     )
     .addStringOption(option =>
       option

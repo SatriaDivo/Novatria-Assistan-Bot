@@ -12,7 +12,13 @@ const labels = {
 function ambilRingkasan(type, item) {
   if (type === "todo") return `${item.Tugas || "-"}\nStatus: ${item.Status || "-"}`;
   if (type === "link") return `${item.Judul || "-"}\n${item.URL || "-"}`;
-  if (type === "jadwal") return `${item.Judul || "-"}\n${item.Tanggal || "-"} ${item.Jam || "-"}`;
+  if (type === "jadwal") {
+    const jamMulai = item["Jam Mulai"] || item.Jam || "-";
+    const jamSelesai = item["Jam Selesai"] ? ` - ${item["Jam Selesai"]}` : "";
+
+    return `${item.Judul || "-"}\n${item.Tanggal || "-"} ${jamMulai}${jamSelesai}`;
+  }
+
   return item.Isi || "-";
 }
 

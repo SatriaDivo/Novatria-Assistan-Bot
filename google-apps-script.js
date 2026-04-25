@@ -28,8 +28,8 @@ const CONFIG = {
   },
   jadwal: {
     sheet: "Jadwal",
-    header: ["ID", "Waktu", "User", "User ID", "Server", "Channel", "Judul", "Tanggal", "Jam", "Catatan"],
-    row: data => [data.id, new Date(), data.user, data.userId, data.server, data.channel, data.judul, data.tanggal, data.jam, data.catatan],
+    header: ["ID", "Waktu", "User", "User ID", "Server", "Channel", "Judul", "Tanggal", "Jam Mulai", "Jam Selesai", "Catatan", "Google Calendar Event ID"],
+    row: data => [data.id, new Date(), data.user, data.userId, data.server, data.channel, data.judul, data.tanggal, data.jam, data.selesai || "", data.catatan, data.calendarEventId || ""],
   },
   arsip: {
     sheet: "Arsip",
@@ -81,9 +81,13 @@ function doPost(e) {
     const sheet = getSheet(spreadsheet, config.sheet, config.header, type);
 
     if (action === "append") {
+      if (type === "jadwal") {
+        data.calendarEventId = createCalendarEvent(data);
+      }
+
       const row = config === CONFIG.log ? config.row(data, type) : config.row(data);
       sheet.appendRow(row);
-      return json({ ok: true, id: data.id || "" });
+      return json({ ok: true, sheet: config.sheet, id: data.id || "", calendarEventId: data.calendarEventId || "" });
     }
 
     if (action === "list") {
@@ -108,6 +112,47 @@ function getSecretKey() {
 
 function getSpreadsheetId() {
   return PropertiesService.getScriptProperties().getProperty("SPREADSHEET_ID") || FALLBACK_SPREADSHEET_ID;
+}
+
+function createCalendarEvent(data) {
+  const start = parseDateTime(data.tanggal, data.jam);
+  const end = data.selesai ? parseDateTime(data.tanggal, data.selesai) : new Date(start.getTime() + 60 * 60 * 1000);
+
+  if (end <= start) {
+    throw new Error("Jam selesai harus lebih besar dari jam mulai.");
+  }
+
+  const description = [
+    data.catatan || "",
+    "",
+    `Dibuat oleh: ${data.user || "-"}`,
+    `Server: ${data.server || "-"}`,
+    `Channel: ${data.channel || "-"}`,
+  ].join("\n");
+
+  const event = CalendarApp.getDefaultCalendar().createEvent(
+    data.judul,
+    start,
+    end,
+    { description }
+  );
+
+  return event.getId();
+}
+
+function parseDateTime(tanggal, jam) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(String(tanggal || ""))) {
+    throw new Error("Format tanggal harus YYYY-MM-DD.");
+  }
+
+  if (!/^([01]\d|2[0-3]):[0-5]\d$/.test(String(jam || ""))) {
+    throw new Error("Format jam harus HH:mm.");
+  }
+
+  const [year, month, day] = tanggal.split("-").map(Number);
+  const [hour, minute] = jam.split(":").map(Number);
+
+  return new Date(year, month - 1, day, hour, minute, 0);
 }
 
 function getSheet(spreadsheet, name, header, type) {
