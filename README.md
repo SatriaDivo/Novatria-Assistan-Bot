@@ -98,6 +98,63 @@ npm start
 
 Saat bot aktif, slash commands akan didaftarkan otomatis ke server tempat bot berada.
 
+## Menjalankan Dengan Docker di Windows
+
+Pastikan Docker Desktop sudah terinstall dan berjalan. File `.env` tetap dipakai dari folder project dan tidak dimasukkan ke image Docker.
+
+Build dan jalankan bot:
+
+```bash
+docker compose up -d --build
+```
+
+Lihat log bot:
+
+```bash
+docker compose logs -f
+```
+
+Restart bot:
+
+```bash
+docker compose restart
+```
+
+Stop bot:
+
+```bash
+docker compose down
+```
+
+Container memakai `restart: unless-stopped`, jadi Docker akan menjalankan ulang bot otomatis setelah Docker Desktop aktif kembali.
+
+### Auto Run Saat Laptop Menyala
+
+Cara paling mudah di Windows:
+
+1. Buka Docker Desktop.
+2. Masuk **Settings**.
+3. Aktifkan **Start Docker Desktop when you sign in**.
+4. Jalankan sekali:
+
+```bash
+docker compose up -d --build
+```
+
+Setelah itu, saat laptop menyala dan kamu login Windows, Docker Desktop akan start dan container `novatria-bot` akan hidup lagi otomatis.
+
+Repository ini menyediakan script Startup Folder untuk auto-run tanpa admin:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\install-startup-folder.ps1
+```
+
+Untuk menghapus auto-run dari Startup Folder:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\uninstall-startup-folder.ps1
+```
+
 ## Permission Discord
 
 Pastikan bot punya permission berikut pada channel target:
