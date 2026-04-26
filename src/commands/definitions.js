@@ -128,6 +128,33 @@ const commands = [
     .addStringOption((option) =>
       option.setName("isi").setDescription("Isi arsip").setRequired(true)
     ),
+
+  new SlashCommandBuilder()
+    .setName("ctfevent")
+    .setDescription("Lihat event CTF upcoming dari CTFtime")
+    .addIntegerOption((option) =>
+      option
+        .setName("limit")
+        .setDescription("Jumlah event yang ditampilkan")
+        .setMinValue(1)
+        .setMaxValue(10)
+        .setRequired(false)
+    ),
+
+  new SlashCommandBuilder()
+    .setName("ctfcek")
+    .setDescription("Kirim info lomba CTF upcoming ke channel CTF"),
+
+  new SlashCommandBuilder()
+    .setName("ctfnotify")
+    .setDescription("Atur notifikasi otomatis lomba CTFtime")
+    .addStringOption((option) =>
+      option
+        .setName("status")
+        .setDescription("Status notifikasi CTFtime")
+        .setRequired(true)
+        .addChoices({ name: "on", value: "on" }, { name: "off", value: "off" })
+    ),
 ];
 
 module.exports = commands.map((command) => command.toJSON());

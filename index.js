@@ -2,6 +2,7 @@ const { Client, GatewayIntentBits, REST, Routes } = require("discord.js");
 const config = require("./src/config");
 const commands = require("./src/commands/definitions");
 const interactionCreate = require("./src/handlers/interactionCreate");
+const { startCtftimeNotifier } = require("./src/utils/ctftimeNotifier");
 
 const client = new Client({
   intents: [GatewayIntentBits.Guilds],
@@ -37,6 +38,7 @@ async function registerCommands(readyClient) {
 client.once("clientReady", async (readyClient) => {
   try {
     await registerCommands(readyClient);
+    startCtftimeNotifier(readyClient);
     console.log(`Bot aktif sebagai ${readyClient.user.tag}`);
   } catch (error) {
     console.error("Gagal mendaftarkan slash commands:", error);

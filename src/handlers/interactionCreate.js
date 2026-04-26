@@ -8,6 +8,9 @@ const todo = require("../commands/todo");
 const link = require("../commands/link");
 const jadwal = require("../commands/jadwal");
 const arsip = require("../commands/arsip");
+const ctfevent = require("../commands/ctfevent");
+const ctfcek = require("../commands/ctfcek");
+const ctfnotify = require("../commands/ctfnotify");
 const logActivity = require("../utils/logActivity");
 const { createEmbed } = require("../utils/replyEmbed");
 
@@ -22,6 +25,9 @@ const commandHandlers = {
   link,
   jadwal,
   arsip,
+  ctfevent,
+  ctfcek,
+  ctfnotify,
 };
 
 async function interactionCreate(interaction) {

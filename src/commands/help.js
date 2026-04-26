@@ -14,7 +14,10 @@ async function execute(interaction) {
       { name: "/jadwal", value: "Buat jadwal ke Sheet + Google Calendar.", inline: true },
       { name: "/arsip", value: "Simpan arsip penting.", inline: true },
       { name: "/list", value: "Lihat data tersimpan beserta ID.", inline: true },
-      { name: "/hapus", value: "Hapus data tertentu berdasarkan ID.", inline: true }
+      { name: "/hapus", value: "Hapus data tertentu berdasarkan ID.", inline: true },
+      { name: "/ctfevent", value: "Lihat lomba CTF upcoming dari CTFtime.", inline: true },
+      { name: "/ctfcek", value: "Kirim info CTF ke channel CTF.", inline: true },
+      { name: "/ctfnotify", value: "Atur notifikasi otomatis CTFtime.", inline: true }
     )
     .setFooter({ text: "Novatria Assistant • Novatria HQ" })
     .setTimestamp();

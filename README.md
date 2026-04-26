@@ -20,6 +20,9 @@ Novatria Assistant Bot adalah Discord bot berbasis Node.js dan discord.js v14 un
 - `/link url judul catatan` untuk mengirim link penting dan menyimpan ke sheet `Link`.
 - `/jadwal judul tanggal jam catatan` untuk mengirim jadwal dan menyimpan ke sheet `Jadwal`.
 - `/arsip isi` untuk mengirim arsip dan menyimpan ke sheet `Arsip`.
+- `/ctfevent limit` untuk melihat lomba CTF upcoming dari CTFtime public API.
+- `/ctfcek` untuk mengirim daftar lomba CTF upcoming ke channel CTF.
+- `/ctfnotify status` untuk mengaktifkan atau mematikan notifikasi otomatis CTFtime.
 - Google Sheet integration.
 - Google Calendar integration untuk event jadwal.
 - Auto-log activity ke channel `log-aktivitas` atau channel log dari `CHANNEL_LOG_ID`.
@@ -34,6 +37,8 @@ Novatria-Bot
 ├─ google-apps-script.js
 ├─ package.json
 ├─ index.js
+├─ data
+│  └─ .gitkeep
 └─ src
    ├─ config.js
    ├─ commands
@@ -47,10 +52,16 @@ Novatria-Bot
    │  ├─ todo.js
    │  ├─ link.js
    │  ├─ jadwal.js
-   │  └─ arsip.js
+   │  ├─ arsip.js
+   │  ├─ ctfevent.js
+   │  ├─ ctfcek.js
+   │  └─ ctfnotify.js
    ├─ handlers
    │  └─ interactionCreate.js
    └─ utils
+      ├─ ctfChannelGuard.js
+      ├─ ctftimeApi.js
+      ├─ ctftimeNotifier.js
       ├─ cariChannel.js
       ├─ getTargetChannel.js
       ├─ kirimKeChannel.js
@@ -110,6 +121,48 @@ npm start
 ```
 
 Saat bot aktif, slash commands akan didaftarkan otomatis ke server tempat bot berada.
+
+## Fitur CTF
+
+Buat category CTF di Discord, lalu siapkan channel berikut:
+
+```text
+🧩 CTF
+├─ 🧩-ctf-info
+├─ 🤖-ctf-command
+├─ 🎯-ctf-target
+├─ 📝-ctf-writeup
+├─ 🔗-ctf-link
+├─ 🧠-ctf-notes
+└─ 🏆-ctf-progress
+```
+
+Command CTF hanya bisa dipakai di channel yang namanya mengandung `ctf-command`, misalnya `🤖-ctf-command`. Siapa saja boleh memakai command CTF selama punya akses ke channel tersebut.
+
+Data lomba diambil dari CTFtime public API, bukan scraping web dan tidak membutuhkan cookie/login CTFtime.
+
+### Command CTF
+
+```text
+/ctfevent limit: 5
+```
+
+Menampilkan lomba CTF upcoming dari sekarang sampai 30 hari ke depan. Opsi `limit` bersifat opsional, default `5`, minimal `1`, maksimal `10`. Tanggal ditampilkan dalam timezone Asia/Jakarta/WIB.
+
+```text
+/ctfcek
+```
+
+Mengirim embed daftar lomba CTF upcoming ke channel tujuan. Bot mencari channel tujuan dengan prioritas nama `ctf-info`, lalu `ctf-lomba`, lalu channel yang mengandung `ctf`.
+
+```text
+/ctfnotify status: on
+/ctfnotify status: off
+```
+
+Mengaktifkan atau mematikan notifikasi otomatis CTFtime. Saat aktif, bot mengecek event CTFtime setiap 6 jam dan mengirim event baru ke channel CTF tanpa mengirim ulang event yang sama.
+
+Status notifikasi disimpan di `data/ctftime-settings.json`. Event yang sudah pernah dikirim disimpan di `data/ctftime-seen.json`. File JSON ini dibuat otomatis saat bot berjalan dan tidak perlu dicommit.
 
 ## Menjalankan Dengan Docker di Windows
 
@@ -233,6 +286,9 @@ Nilai `SECRET_KEY` harus sama dengan `SHEET_SECRET` di `.env`. Setelah mengubah 
 /link url: https://example.com judul: Contoh catatan: testing link
 /jadwal judul: Meeting tanggal: 25 bulan: 4 tahun: 2026 jam: 20:00 selesai: 21:00 catatan: bahas bot
 /arsip isi: dokumen penting testing
+/ctfevent limit: 5
+/ctfcek
+/ctfnotify status: on
 ```
 
 ## Catatan Keamanan

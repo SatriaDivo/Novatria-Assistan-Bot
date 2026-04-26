@@ -5,3 +5,5 @@ yarn-debug.log*
 yarn-error.log*
 .DS_Store
 google-apps-script.local.js
+data/*.json
+!data/.gitkeep
