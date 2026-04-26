@@ -14,32 +14,102 @@ const CONFIG = {
   catat: {
     sheet: "Catatan",
     header: ["ID", "Waktu", "User", "User ID", "Server", "Channel", "Isi"],
-    row: data => [data.id, new Date(), data.user, data.userId, data.server, data.channel, data.isi],
+    row: (data) => [
+      data.id,
+      new Date(),
+      data.user,
+      data.userId,
+      data.server,
+      data.channel,
+      data.isi,
+    ],
   },
   todo: {
     sheet: "Todo",
     header: ["ID", "Waktu", "User", "User ID", "Server", "Channel", "Tugas", "Status"],
-    row: data => [data.id, new Date(), data.user, data.userId, data.server, data.channel, data.tugas, data.status],
+    row: (data) => [
+      data.id,
+      new Date(),
+      data.user,
+      data.userId,
+      data.server,
+      data.channel,
+      data.tugas,
+      data.status,
+    ],
   },
   link: {
     sheet: "Link",
     header: ["ID", "Waktu", "User", "User ID", "Server", "Channel", "Judul", "URL", "Catatan"],
-    row: data => [data.id, new Date(), data.user, data.userId, data.server, data.channel, data.judul, data.url, data.catatan],
+    row: (data) => [
+      data.id,
+      new Date(),
+      data.user,
+      data.userId,
+      data.server,
+      data.channel,
+      data.judul,
+      data.url,
+      data.catatan,
+    ],
   },
   jadwal: {
     sheet: "Jadwal",
-    header: ["ID", "Waktu", "User", "User ID", "Server", "Channel", "Judul", "Tanggal", "Jam Mulai", "Jam Selesai", "Catatan", "Google Calendar Event ID"],
-    row: data => [data.id, new Date(), data.user, data.userId, data.server, data.channel, data.judul, data.tanggal, data.jam, data.selesai || "", data.catatan, data.calendarEventId || ""],
+    header: [
+      "ID",
+      "Waktu",
+      "User",
+      "User ID",
+      "Server",
+      "Channel",
+      "Judul",
+      "Tanggal",
+      "Jam Mulai",
+      "Jam Selesai",
+      "Catatan",
+      "Google Calendar Event ID",
+    ],
+    row: (data) => [
+      data.id,
+      new Date(),
+      data.user,
+      data.userId,
+      data.server,
+      data.channel,
+      data.judul,
+      data.tanggal,
+      data.jam,
+      data.selesai || "",
+      data.catatan,
+      data.calendarEventId || "",
+    ],
   },
   arsip: {
     sheet: "Arsip",
     header: ["ID", "Waktu", "User", "User ID", "Server", "Channel", "Isi"],
-    row: data => [data.id, new Date(), data.user, data.userId, data.server, data.channel, data.isi],
+    row: (data) => [
+      data.id,
+      new Date(),
+      data.user,
+      data.userId,
+      data.server,
+      data.channel,
+      data.isi,
+    ],
   },
   log: {
     sheet: "Log",
     header: ["ID", "Waktu", "Type", "User", "User ID", "Server", "Channel", "Data"],
-    row: (data, type) => [data.id || "", new Date(), type, data.user, data.userId, data.server, data.channel, JSON.stringify(data)],
+    row: (data, type) => [
+      data.id || "",
+      new Date(),
+      type,
+      data.user,
+      data.userId,
+      data.server,
+      data.channel,
+      JSON.stringify(data),
+    ],
   },
 };
 
@@ -64,7 +134,10 @@ function doPost(e) {
     const spreadsheetId = getSpreadsheetId();
 
     if (!spreadsheetId || spreadsheetId === "LINK-SHEET-ID-ANDA") {
-      return json({ ok: false, error: "SPREADSHEET_ID belum diatur di Script Properties atau kode Apps Script." });
+      return json({
+        ok: false,
+        error: "SPREADSHEET_ID belum diatur di Script Properties atau kode Apps Script.",
+      });
     }
 
     const spreadsheet = SpreadsheetApp.openById(spreadsheetId);
@@ -74,7 +147,7 @@ function doPost(e) {
         ok: true,
         version: SCRIPT_VERSION,
         spreadsheetName: spreadsheet.getName(),
-        sheets: Object.keys(CONFIG).map(key => CONFIG[key].sheet),
+        sheets: Object.keys(CONFIG).map((key) => CONFIG[key].sheet),
       });
     }
 
@@ -87,7 +160,12 @@ function doPost(e) {
 
       const row = config === CONFIG.log ? config.row(data, type) : config.row(data);
       sheet.appendRow(row);
-      return json({ ok: true, sheet: config.sheet, id: data.id || "", calendarEventId: data.calendarEventId || "" });
+      return json({
+        ok: true,
+        sheet: config.sheet,
+        id: data.id || "",
+        calendarEventId: data.calendarEventId || "",
+      });
     }
 
     if (action === "list") {
@@ -111,7 +189,9 @@ function getSecretKey() {
 }
 
 function getSpreadsheetId() {
-  return PropertiesService.getScriptProperties().getProperty("SPREADSHEET_ID") || FALLBACK_SPREADSHEET_ID;
+  return (
+    PropertiesService.getScriptProperties().getProperty("SPREADSHEET_ID") || FALLBACK_SPREADSHEET_ID
+  );
 }
 
 function authorizeCalendarAccess() {
@@ -122,7 +202,9 @@ function authorizeCalendarAccess() {
 
 function createCalendarEvent(data) {
   const start = parseDateTime(data.tanggal, data.jam);
-  const end = data.selesai ? parseDateTime(data.tanggal, data.selesai) : new Date(start.getTime() + 60 * 60 * 1000);
+  const end = data.selesai
+    ? parseDateTime(data.tanggal, data.selesai)
+    : new Date(start.getTime() + 60 * 60 * 1000);
 
   if (end <= start) {
     throw new Error("Jam selesai harus lebih besar dari jam mulai.");
@@ -136,12 +218,9 @@ function createCalendarEvent(data) {
     `Channel: ${data.channel || "-"}`,
   ].join("\n");
 
-  const event = CalendarApp.getDefaultCalendar().createEvent(
-    data.judul,
-    start,
-    end,
-    { description }
-  );
+  const event = CalendarApp.getDefaultCalendar().createEvent(data.judul, start, end, {
+    description,
+  });
 
   return event.getId();
 }
@@ -199,8 +278,8 @@ function backfillMissingIds(sheet, type, width) {
   const values = range.getValues();
   let changed = false;
 
-  values.forEach(row => {
-    const hasData = row.slice(2).some(value => value !== "");
+  values.forEach((row) => {
+    const hasData = row.slice(2).some((value) => value !== "");
 
     if (hasData && !row[0]) {
       row[0] = makeId(type);
@@ -231,10 +310,10 @@ function listRows(sheet, header, limit) {
   const values = sheet.getRange(2, 1, lastRow - 1, header.length).getValues();
 
   return values
-    .filter(row => hasMeaningfulData(row))
+    .filter((row) => hasMeaningfulData(row))
     .slice(-limit)
     .reverse()
-    .map(row => {
+    .map((row) => {
       const item = {};
 
       header.forEach((title, index) => {
@@ -246,7 +325,7 @@ function listRows(sheet, header, limit) {
 }
 
 function hasMeaningfulData(row) {
-  return row.slice(2).some(value => value !== "");
+  return row.slice(2).some((value) => value !== "");
 }
 
 function deleteById(sheet, id) {
@@ -268,7 +347,7 @@ function deleteById(sheet, id) {
 }
 
 function json(payload) {
-  return ContentService
-    .createTextOutput(JSON.stringify(payload))
-    .setMimeType(ContentService.MimeType.JSON);
+  return ContentService.createTextOutput(JSON.stringify(payload)).setMimeType(
+    ContentService.MimeType.JSON
+  );
 }

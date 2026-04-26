@@ -15,10 +15,7 @@ async function registerCommands(readyClient) {
   console.log("Mendaftarkan slash commands...");
 
   for (const guild of guilds.values()) {
-    await rest.put(
-      Routes.applicationGuildCommands(config.clientId, guild.id),
-      { body: commands }
-    );
+    await rest.put(Routes.applicationGuildCommands(config.clientId, guild.id), { body: commands });
 
     console.log(`Slash commands berhasil didaftarkan di server: ${guild.name}`);
   }
@@ -26,7 +23,7 @@ async function registerCommands(readyClient) {
   console.log("Slash commands berhasil didaftarkan.");
 }
 
-client.once("clientReady", async readyClient => {
+client.once("clientReady", async (readyClient) => {
   try {
     await registerCommands(readyClient);
     console.log(`Bot aktif sebagai ${readyClient.user.tag}`);

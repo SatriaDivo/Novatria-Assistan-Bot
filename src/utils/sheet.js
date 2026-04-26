@@ -26,7 +26,9 @@ async function requestSheet(action, type, data = {}) {
   try {
     result = JSON.parse(text);
   } catch {
-    throw new Error("Respons Apps Script bukan JSON. Cek SHEET_WEBAPP_URL dan pastikan Web App sudah dideploy.");
+    throw new Error(
+      "Respons Apps Script bukan JSON. Cek SHEET_WEBAPP_URL dan pastikan Web App sudah dideploy."
+    );
   }
 
   if (!response.ok || !result.ok) {
@@ -34,11 +36,15 @@ async function requestSheet(action, type, data = {}) {
   }
 
   if (action === "list" && !Array.isArray(result.items)) {
-    throw new Error("Apps Script belum mendukung /list. Paste ulang google-apps-script.js ke Apps Script, lalu deploy versi Web App terbaru.");
+    throw new Error(
+      "Apps Script belum mendukung /list. Paste ulang google-apps-script.js ke Apps Script, lalu deploy versi Web App terbaru."
+    );
   }
 
   if (action === "delete" && typeof result.deleted !== "boolean") {
-    throw new Error("Apps Script belum mendukung /hapus. Paste ulang google-apps-script.js ke Apps Script, lalu deploy versi Web App terbaru.");
+    throw new Error(
+      "Apps Script belum mendukung /hapus. Paste ulang google-apps-script.js ke Apps Script, lalu deploy versi Web App terbaru."
+    );
   }
 
   return result;
@@ -60,7 +66,9 @@ async function cekSheetStatus() {
   const result = await requestSheet("status", "log");
 
   if (!result.version) {
-    throw new Error("Apps Script belum mendukung health check. Paste ulang google-apps-script.js, lalu deploy versi Web App terbaru.");
+    throw new Error(
+      "Apps Script belum mendukung health check. Paste ulang google-apps-script.js, lalu deploy versi Web App terbaru."
+    );
   }
 
   return result;

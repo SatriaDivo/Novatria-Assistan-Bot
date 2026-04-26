@@ -7,6 +7,7 @@ const todo = require("../commands/todo");
 const link = require("../commands/link");
 const jadwal = require("../commands/jadwal");
 const arsip = require("../commands/arsip");
+const logActivity = require("../utils/logActivity");
 
 const commandHandlers = {
   ping,
@@ -32,12 +33,32 @@ async function interactionCreate(interaction) {
     });
   }
 
+  let activityStatus = "Berhasil";
+  let activityMessage = "Command selesai diproses.";
+  const originalEditReply = interaction.editReply.bind(interaction);
+
+  interaction.editReply = async (options) => {
+    const content = typeof options === "string" ? options : options?.content;
+
+    if (content) {
+      activityMessage = content;
+
+      if (content.trim().startsWith("❌")) {
+        activityStatus = "Gagal";
+      }
+    }
+
+    return originalEditReply(options);
+  };
+
   try {
     // Discord butuh respons awal cepat. Defer dulu agar command tidak timeout.
     await interaction.deferReply({ flags: 64 });
     await handler.execute(interaction);
+    await logActivity(interaction, activityStatus, activityMessage);
   } catch (error) {
     console.error(`Error command /${interaction.commandName}:`, error);
+    await logActivity(interaction, "Gagal", error.message || "Error tidak diketahui");
 
     const message = {
       content: `❌ Terjadi error saat menjalankan command: ${error.message || "Error tidak diketahui"}`,

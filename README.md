@@ -1,8 +1,14 @@
 # Novatria Assistant Bot
 
+[![Node.js](https://img.shields.io/badge/Node.js-20.x-339933?logo=node.js&logoColor=white)](https://nodejs.org/)
+[![discord.js](https://img.shields.io/badge/discord.js-v14-5865F2?logo=discord&logoColor=white)](https://discord.js.org/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![CI](https://github.com/SatriaDivo/Novatria-Assistan-Bot/actions/workflows/ci.yml/badge.svg)](https://github.com/SatriaDivo/Novatria-Assistan-Bot/actions/workflows/ci.yml)
+[![Project Status](https://img.shields.io/badge/status-active-brightgreen.svg)](#)
+
 Novatria Assistant Bot adalah Discord bot berbasis Node.js dan discord.js v14 untuk mencatat catatan, todo, link penting, jadwal, dan arsip ke channel Discord sekaligus menyimpan datanya ke Google Sheet melalui Google Apps Script Web App.
 
-## Fitur
+## Features
 
 - `/ping` untuk mengecek bot aktif.
 - `/status` untuk mengecek channel target, permission bot, dan konfigurasi Google Sheet.
@@ -13,6 +19,9 @@ Novatria Assistant Bot adalah Discord bot berbasis Node.js dan discord.js v14 un
 - `/link url judul catatan` untuk mengirim link penting dan menyimpan ke sheet `Link`.
 - `/jadwal judul tanggal jam catatan` untuk mengirim jadwal dan menyimpan ke sheet `Jadwal`.
 - `/arsip isi` untuk mengirim arsip dan menyimpan ke sheet `Arsip`.
+- Google Sheet integration.
+- Google Calendar integration untuk event jadwal.
+- Auto-log activity ke channel `log-aktivitas` atau channel log dari `CHANNEL_LOG_ID`.
 
 ## Struktur Folder
 
@@ -42,6 +51,7 @@ Novatria-Bot
       ├─ cariChannel.js
       ├─ getTargetChannel.js
       ├─ kirimKeChannel.js
+      ├─ logActivity.js
       ├─ buatId.js
       └─ sheet.js
 ```
@@ -217,7 +227,7 @@ Nilai `SECRET_KEY` harus sama dengan `SHEET_SECRET` di `.env`. Setelah mengubah 
 /catat isi: test catatan
 /todo tugas: belajar discord bot
 /link url: https://example.com judul: Contoh catatan: testing link
-/jadwal judul: Meeting tanggal: 25 April 2026 jam: 20:00 catatan: bahas bot
+/jadwal judul: Meeting tanggal: 25 bulan: 4 tahun: 2026 jam: 20:00 selesai: 21:00 catatan: bahas bot
 /arsip isi: dokumen penting testing
 ```
 

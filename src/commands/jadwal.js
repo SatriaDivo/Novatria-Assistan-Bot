@@ -7,9 +7,8 @@ function buatTanggalIso(day, month, year) {
   const text = `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
 
   const date = new Date(Date.UTC(year, month - 1, day));
-  const valid = date.getUTCFullYear() === year &&
-    date.getUTCMonth() === month - 1 &&
-    date.getUTCDate() === day;
+  const valid =
+    date.getUTCFullYear() === year && date.getUTCMonth() === month - 1 && date.getUTCDate() === day;
 
   return valid ? text : null;
 }
@@ -32,7 +31,8 @@ async function execute(interaction) {
 
   if (!tanggal) {
     return interaction.editReply({
-      content: "❌ Tanggal tidak valid. Cek kombinasi `tanggal`, `bulan`, dan `tahun`. Contoh valid: tanggal `30`, bulan `4`, tahun `2026`.",
+      content:
+        "❌ Tanggal tidak valid. Cek kombinasi `tanggal`, `bulan`, dan `tahun`. Contoh valid: tanggal `30`, bulan `4`, tahun `2026`.",
     });
   }
 
@@ -83,7 +83,9 @@ async function execute(interaction) {
       catatan,
     });
 
-    const eventInfo = result.calendarEventId ? `\n📆 Calendar Event ID: \`${result.calendarEventId}\`` : "";
+    const eventInfo = result.calendarEventId
+      ? `\n📆 Calendar Event ID: \`${result.calendarEventId}\``
+      : "";
 
     return interaction.editReply({
       content: `✅ Jadwal berhasil dikirim ke ${channelJadwal}, disimpan ke Google Sheet, dan dibuat di Google Calendar. ID: \`${id}\`${eventInfo}`,

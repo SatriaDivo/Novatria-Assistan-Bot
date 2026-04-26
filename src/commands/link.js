@@ -30,10 +30,7 @@ async function execute(interaction) {
     .setTitle(`🔗 ${judul}`)
     .setURL(url)
     .setDescription(catatan)
-    .addFields(
-      { name: "ID", value: id, inline: true },
-      { name: "URL", value: url }
-    )
+    .addFields({ name: "ID", value: id, inline: true }, { name: "URL", value: url })
     .setFooter({ text: `Dibuat oleh ${interaction.user.tag}` })
     .setTimestamp();
 
