@@ -7,10 +7,21 @@ const client = new Client({
   intents: [GatewayIntentBits.Guilds],
 });
 
+// Hapus semua slash command global lama milik aplikasi agar tidak dobel dengan command guild.
+async function clearGlobalCommands(rest) {
+  console.log("Menghapus global slash commands lama...");
+
+  await rest.put(Routes.applicationCommands(config.clientId), { body: [] });
+
+  console.log("Global slash commands lama berhasil dihapus.");
+}
+
 // Daftarkan slash commands ke setiap server agar langsung muncul.
 async function registerCommands(readyClient) {
   const rest = new REST({ version: "10" }).setToken(config.token);
   const guilds = readyClient.guilds.cache;
+
+  await clearGlobalCommands(rest);
 
   console.log("Mendaftarkan slash commands...");
 

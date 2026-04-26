@@ -7,6 +7,7 @@ COPY package*.json ./
 RUN npm ci --omit=dev
 
 COPY index.js ./
+COPY scripts ./scripts
 COPY src ./src
 
 USER node

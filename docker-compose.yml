@@ -12,3 +12,14 @@ services:
       options:
         max-size: "10m"
         max-file: "3"
+
+  novatria-clear-global:
+    build:
+      context: .
+    env_file:
+      - .env
+    restart: "no"
+    init: true
+    command: npm run clear:global
+    profiles:
+      - tools
