@@ -11,6 +11,9 @@ const arsip = require("../commands/arsip");
 const ctfevent = require("../commands/ctfevent");
 const ctfcek = require("../commands/ctfcek");
 const ctfnotify = require("../commands/ctfnotify");
+const ctf = require("../commands/ctf");
+const writeup = require("../commands/writeup");
+const progress = require("../commands/progress");
 const logActivity = require("../utils/logActivity");
 const { isCtfArea, isCtfCommandName } = require("../utils/ctfChannelGuard");
 const { createEmbed } = require("../utils/replyEmbed");
@@ -29,6 +32,9 @@ const commandHandlers = {
   ctfevent,
   ctfcek,
   ctfnotify,
+  ctf,
+  writeup,
+  progress,
 };
 
 async function interactionCreate(interaction) {
@@ -46,7 +52,7 @@ async function interactionCreate(interaction) {
   if (isCtfArea(interaction.channel) && !isCtfCommandName(interaction.commandName)) {
     return interaction.reply({
       content:
-        "❌ Di kategori CTF, gunakan command CTF saja: `/ctfevent`, `/ctfcek`, atau `/ctfnotify`.",
+        "❌ Di kategori CTF, gunakan command CTF saja: `/ctfevent`, `/ctfcek`, `/ctfnotify`, `/ctf`, `/writeup`, atau `/progress`.",
       flags: 64,
     });
   }

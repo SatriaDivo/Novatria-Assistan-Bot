@@ -1,6 +1,13 @@
 const CTF_COMMAND_KEYWORD = "ctf-command";
 const CTF_TARGET_PRIORITIES = ["ctf-info", "ctf-lomba", "ctf"];
-const CTF_COMMAND_NAMES = new Set(["ctfevent", "ctfcek", "ctfnotify"]);
+const CTF_COMMAND_NAMES = new Set([
+  "ctfevent",
+  "ctfcek",
+  "ctfnotify",
+  "ctf",
+  "writeup",
+  "progress",
+]);
 
 async function respondEphemeral(interaction, content) {
   const payload = { content };

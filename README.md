@@ -23,6 +23,9 @@ Novatria Assistant Bot adalah Discord bot berbasis Node.js dan discord.js v14 un
 - `/ctfevent limit` untuk melihat lomba CTF upcoming dari CTFtime public API.
 - `/ctfcek` untuk mengirim daftar lomba CTF upcoming ke channel CTF.
 - `/ctfnotify status` untuk mengaktifkan atau mematikan notifikasi otomatis CTFtime.
+- `/ctf nama platform url kategori catatan` untuk menambahkan challenge CTF.
+- `/writeup judul challenge ringkasan url` untuk menyimpan writeup CTF.
+- `/progress challenge status catatan` untuk update progress challenge CTF.
 - Google Sheet integration.
 - Google Calendar integration untuk event jadwal.
 - Auto-log activity ke channel `log-aktivitas` atau channel log dari `CHANNEL_LOG_ID`.
@@ -55,11 +58,15 @@ Novatria-Bot
    │  ├─ arsip.js
    │  ├─ ctfevent.js
    │  ├─ ctfcek.js
-   │  └─ ctfnotify.js
+   │  ├─ ctfnotify.js
+   │  ├─ ctf.js
+   │  ├─ writeup.js
+   │  └─ progress.js
    ├─ handlers
    │  └─ interactionCreate.js
    └─ utils
       ├─ ctfChannelGuard.js
+      ├─ ctfChannels.js
       ├─ ctftimeApi.js
       ├─ ctftimeNotifier.js
       ├─ cariChannel.js
@@ -143,6 +150,29 @@ Di channel/category CTF, bot juga menolak command non-CTF seperti `/catat`, `/to
 
 Data lomba diambil dari CTFtime public API, bukan scraping web dan tidak membutuhkan cookie/login CTFtime.
 
+### CTF Zone
+
+`🧩 CTF ZONE — NOVATRIA HQ`
+
+Channel ini khusus untuk belajar, tracking, dan dokumentasi CTF.
+
+Gunakan area CTF ini untuk:
+
+- Info lomba CTF.
+- Target/challenge yang sedang dikerjakan.
+- Writeup dan pembahasan.
+- Link platform CTF.
+- Notes command, payload, tools, dan hint.
+- Progress belajar.
+
+Rules CTF:
+
+- Hanya untuk platform CTF resmi, lab pribadi, dan target yang memang diizinkan.
+- Jangan menyerang website/server nyata tanpa izin.
+- Jangan share token, password, cookie, atau data sensitif.
+- Simpan catatan dan writeup dengan rapi.
+- Fokus belajar, latihan, dan dokumentasi.
+
 ### Membatasi Slash Menu Di Category CTF
 
 Discord tidak mengizinkan bot token biasa mengubah visibilitas command per channel secara otomatis. Agar slash menu di category CTF benar-benar hanya menampilkan command CTF, atur dari Discord:
@@ -153,7 +183,7 @@ Discord tidak mengizinkan bot token biasa mengubah visibilitas command per chann
 4. Untuk channel/category CTF, nonaktifkan command non-CTF:
    `/ping`, `/help`, `/status`, `/list`, `/hapus`, `/catat`, `/todo`, `/link`, `/jadwal`, `/arsip`.
 5. Biarkan command CTF aktif:
-   `/ctfevent`, `/ctfcek`, `/ctfnotify`.
+   `/ctfevent`, `/ctfcek`, `/ctfnotify`, `/ctf`, `/writeup`, `/progress`.
 
 Kalau pengaturan visibility belum dilakukan di Discord, command non-CTF mungkin masih terlihat di slash menu, tetapi bot tetap akan menolaknya saat dipakai di area CTF.
 
@@ -179,6 +209,24 @@ Mengirim embed daftar lomba CTF upcoming ke channel tujuan. Bot mencari channel 
 Mengaktifkan atau mematikan notifikasi otomatis CTFtime. Saat aktif, bot mengecek event CTFtime setiap 6 jam dan mengirim event baru ke channel CTF tanpa mengirim ulang event yang sama.
 
 Status notifikasi disimpan di `data/ctftime-settings.json`. Event yang sudah pernah dikirim disimpan di `data/ctftime-seen.json`. File JSON ini dibuat otomatis saat bot berjalan dan tidak perlu dicommit.
+
+```text
+/ctf nama: SQL Injection Lab platform: TryHackMe url: https://example.com kategori: web catatan: Fokus basic auth bypass
+```
+
+Menambahkan challenge CTF ke channel `🎯-ctf-target` dan menyimpannya sebagai `ctf_challenge` jika Google Sheet aktif.
+
+```text
+/writeup judul: SQL Injection Lab challenge: SQL Injection Lab ringkasan: Payload utama dan langkah exploit url: https://example.com/writeup
+```
+
+Menyimpan writeup ke channel `📝-ctf-writeup` dan menyimpannya sebagai `ctf_writeup` jika Google Sheet aktif.
+
+```text
+/progress challenge: SQL Injection Lab status: Sedang dikerjakan catatan: Sudah dapat endpoint login
+```
+
+Mengirim update progress ke channel `🏆-ctf-progress` dan menyimpannya sebagai `ctf_progress` jika Google Sheet aktif.
 
 ## Menjalankan Dengan Docker di Windows
 
@@ -305,6 +353,9 @@ Nilai `SECRET_KEY` harus sama dengan `SHEET_SECRET` di `.env`. Setelah mengubah 
 /ctfevent limit: 5
 /ctfcek
 /ctfnotify status: on
+/ctf nama: SQL Injection Lab platform: TryHackMe kategori: web catatan: latihan auth bypass
+/writeup judul: SQL Injection Lab challenge: SQL Injection Lab ringkasan: payload dan step exploit
+/progress challenge: SQL Injection Lab status: Sedang dikerjakan catatan: sudah dapat hint pertama
 ```
 
 ## Catatan Keamanan

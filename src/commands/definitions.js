@@ -155,6 +155,69 @@ const commands = [
         .setRequired(true)
         .addChoices({ name: "on", value: "on" }, { name: "off", value: "off" })
     ),
+
+  new SlashCommandBuilder()
+    .setName("ctf")
+    .setDescription("Tambah challenge CTF ke channel target")
+    .addStringOption((option) =>
+      option.setName("nama").setDescription("Nama challenge CTF").setRequired(true)
+    )
+    .addStringOption((option) =>
+      option.setName("platform").setDescription("Nama platform CTF").setRequired(false)
+    )
+    .addStringOption((option) =>
+      option.setName("url").setDescription("URL challenge atau platform").setRequired(false)
+    )
+    .addStringOption((option) =>
+      option
+        .setName("kategori")
+        .setDescription("Kategori, contoh: web, crypto, pwn")
+        .setRequired(false)
+    )
+    .addStringOption((option) =>
+      option
+        .setName("catatan")
+        .setDescription("Catatan, hint, atau target belajar")
+        .setRequired(false)
+    ),
+
+  new SlashCommandBuilder()
+    .setName("writeup")
+    .setDescription("Simpan writeup CTF")
+    .addStringOption((option) =>
+      option.setName("judul").setDescription("Judul writeup").setRequired(true)
+    )
+    .addStringOption((option) =>
+      option.setName("challenge").setDescription("Nama challenge terkait").setRequired(false)
+    )
+    .addStringOption((option) =>
+      option.setName("ringkasan").setDescription("Ringkasan pembahasan").setRequired(false)
+    )
+    .addStringOption((option) =>
+      option.setName("url").setDescription("URL writeup jika ada").setRequired(false)
+    ),
+
+  new SlashCommandBuilder()
+    .setName("progress")
+    .setDescription("Update progress challenge CTF")
+    .addStringOption((option) =>
+      option.setName("challenge").setDescription("Nama challenge CTF").setRequired(true)
+    )
+    .addStringOption((option) =>
+      option
+        .setName("status")
+        .setDescription("Status pengerjaan")
+        .setRequired(true)
+        .addChoices(
+          { name: "Belum mulai", value: "todo" },
+          { name: "Sedang dikerjakan", value: "proses" },
+          { name: "Stuck / butuh hint", value: "stuck" },
+          { name: "Selesai", value: "selesai" }
+        )
+    )
+    .addStringOption((option) =>
+      option.setName("catatan").setDescription("Catatan progress").setRequired(false)
+    ),
 ];
 
 module.exports = commands.map((command) => command.toJSON());
