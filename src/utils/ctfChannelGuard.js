@@ -1,5 +1,6 @@
 const CTF_COMMAND_KEYWORD = "ctf-command";
 const CTF_TARGET_PRIORITIES = ["ctf-info", "ctf-lomba", "ctf"];
+const CTF_COMMAND_NAMES = new Set(["ctfevent", "ctfcek", "ctfnotify"]);
 
 async function respondEphemeral(interaction, content) {
   const payload = { content };
@@ -25,6 +26,17 @@ async function assertCtfCommandChannel(interaction) {
   );
 
   return false;
+}
+
+function isCtfCommandName(commandName) {
+  return CTF_COMMAND_NAMES.has(commandName);
+}
+
+function isCtfArea(channel) {
+  const channelName = channel?.name?.toLowerCase() || "";
+  const parentName = channel?.parent?.name?.toLowerCase() || "";
+
+  return channelName.includes("ctf") || parentName.includes("ctf");
 }
 
 function findCtfTargetChannel(guild) {
@@ -59,4 +71,6 @@ module.exports = {
   assertCtfCommandChannel,
   findCtfTargetChannel,
   findCtfTargetChannelFromClient,
+  isCtfArea,
+  isCtfCommandName,
 };

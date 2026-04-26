@@ -139,7 +139,23 @@ Buat category CTF di Discord, lalu siapkan channel berikut:
 
 Command CTF hanya bisa dipakai di channel yang namanya mengandung `ctf-command`, misalnya `🤖-ctf-command`. Siapa saja boleh memakai command CTF selama punya akses ke channel tersebut.
 
+Di channel/category CTF, bot juga menolak command non-CTF seperti `/catat`, `/todo`, `/jadwal`, dan command umum lain. Jadi area CTF tetap bersih untuk workflow CTF.
+
 Data lomba diambil dari CTFtime public API, bukan scraping web dan tidak membutuhkan cookie/login CTFtime.
+
+### Membatasi Slash Menu Di Category CTF
+
+Discord tidak mengizinkan bot token biasa mengubah visibilitas command per channel secara otomatis. Agar slash menu di category CTF benar-benar hanya menampilkan command CTF, atur dari Discord:
+
+1. Buka **Server Settings**.
+2. Pilih **Integrations**.
+3. Pilih aplikasi **Novatria Assistant** lalu klik **Manage**.
+4. Untuk channel/category CTF, nonaktifkan command non-CTF:
+   `/ping`, `/help`, `/status`, `/list`, `/hapus`, `/catat`, `/todo`, `/link`, `/jadwal`, `/arsip`.
+5. Biarkan command CTF aktif:
+   `/ctfevent`, `/ctfcek`, `/ctfnotify`.
+
+Kalau pengaturan visibility belum dilakukan di Discord, command non-CTF mungkin masih terlihat di slash menu, tetapi bot tetap akan menolaknya saat dipakai di area CTF.
 
 ### Command CTF
 
