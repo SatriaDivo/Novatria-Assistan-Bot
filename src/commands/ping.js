@@ -1,7 +1,7 @@
+const { replySuccess } = require("../utils/replyEmbed");
+
 async function execute(interaction) {
-  await interaction.editReply({
-    content: "🏓 Pong! Novatria Assistant aktif.",
-  });
+  await replySuccess(interaction, "Pong!", "Novatria Assistant aktif dan siap digunakan.");
 }
 
 module.exports = { execute };

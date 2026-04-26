@@ -1,4 +1,5 @@
 const { hapusSheet } = require("../utils/sheet");
+const { replyError, replySuccess } = require("../utils/replyEmbed");
 
 async function execute(interaction) {
   const type = interaction.options.getString("tipe");
@@ -8,20 +9,22 @@ async function execute(interaction) {
   try {
     result = await hapusSheet(type, id);
   } catch (error) {
-    return interaction.editReply({
-      content: `❌ ${error.message}`,
-    });
+    return replyError(interaction, "Gagal menghapus data", error.message);
   }
 
   if (!result.deleted) {
-    return interaction.editReply({
-      content: `❌ Data dengan ID \`${id}\` tidak ditemukan di tipe \`${type}\`. Cek dulu dengan \`/list\`.`,
-    });
+    return replyError(
+      interaction,
+      "Data tidak ditemukan",
+      `Data dengan ID \`${id}\` tidak ditemukan di tipe \`${type}\`. Cek dulu dengan \`/list\`.`
+    );
   }
 
-  await interaction.editReply({
-    content: `✅ Data \`${id}\` berhasil dihapus dari Google Sheet.`,
-  });
+  await replySuccess(
+    interaction,
+    "Data berhasil dihapus",
+    `Data \`${id}\` berhasil dihapus dari Google Sheet.`
+  );
 }
 
 module.exports = { execute };

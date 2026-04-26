@@ -3,6 +3,7 @@ const getTargetChannel = require("../utils/getTargetChannel");
 const kirimKeChannel = require("../utils/kirimKeChannel");
 const simpanKeSheet = require("../utils/sheet");
 const buatId = require("../utils/buatId");
+const { replyError, replySuccess } = require("../utils/replyEmbed");
 
 async function execute(interaction) {
   const id = buatId("link");
@@ -14,15 +15,19 @@ async function execute(interaction) {
   try {
     new URL(url);
   } catch {
-    return interaction.editReply({
-      content: "❌ URL tidak valid. Contoh: `https://example.com`",
-    });
+    return replyError(
+      interaction,
+      "URL tidak valid",
+      "Contoh URL yang benar: `https://example.com`."
+    );
   }
 
   if (!channelLink) {
-    return interaction.editReply({
-      content: "❌ Channel link-penting tidak ditemukan.",
-    });
+    return replyError(
+      interaction,
+      "Channel tidak ditemukan",
+      "Channel link-penting tidak ditemukan."
+    );
   }
 
   const embed = new EmbedBuilder()
@@ -39,7 +44,7 @@ async function execute(interaction) {
   });
 
   if (!hasilKirim.ok) {
-    return interaction.editReply({ content: hasilKirim.error });
+    return replyError(interaction, "Gagal mengirim link", hasilKirim.error);
   }
 
   await simpanKeSheet("link", {
@@ -53,9 +58,9 @@ async function execute(interaction) {
     catatan,
   });
 
-  await interaction.editReply({
-    content: `✅ Link berhasil dikirim ke ${channelLink}. ID: \`${id}\``,
-  });
+  await replySuccess(interaction, "Link berhasil", `Link berhasil dikirim ke ${channelLink}.`, [
+    { name: "ID", value: `\`${id}\`` },
+  ]);
 }
 
 module.exports = { execute };

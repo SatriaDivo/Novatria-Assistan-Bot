@@ -11,6 +11,7 @@ Novatria Assistant Bot adalah Discord bot berbasis Node.js dan discord.js v14 un
 ## Features
 
 - `/ping` untuk mengecek bot aktif.
+- `/help` untuk melihat daftar command.
 - `/status` untuk mengecek channel target, permission bot, dan konfigurasi Google Sheet.
 - `/list tipe limit` untuk melihat data terbaru beserta ID sebelum menghapus.
 - `/hapus tipe id` untuk menghapus data dari Google Sheet berdasarkan ID.
@@ -22,6 +23,7 @@ Novatria Assistant Bot adalah Discord bot berbasis Node.js dan discord.js v14 un
 - Google Sheet integration.
 - Google Calendar integration untuk event jadwal.
 - Auto-log activity ke channel `log-aktivitas` atau channel log dari `CHANNEL_LOG_ID`.
+- Embed message untuk tampilan command yang lebih rapi.
 
 ## Struktur Folder
 
@@ -37,6 +39,7 @@ Novatria-Bot
    ├─ commands
    │  ├─ definitions.js
    │  ├─ ping.js
+   │  ├─ help.js
    │  ├─ status.js
    │  ├─ list.js
    │  ├─ hapus.js
@@ -221,6 +224,7 @@ Nilai `SECRET_KEY` harus sama dengan `SHEET_SECRET` di `.env`. Setelah mengubah 
 
 ```text
 /ping
+/help
 /status
 /list tipe: Todo limit: 10
 /hapus tipe: Todo id: TODO-MABC1234-ABCD

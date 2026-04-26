@@ -2,6 +2,7 @@ const { EmbedBuilder } = require("discord.js");
 const cariChannel = require("../utils/cariChannel");
 const simpanKeSheet = require("../utils/sheet");
 const buatId = require("../utils/buatId");
+const { replyError, replySuccess } = require("../utils/replyEmbed");
 
 function buatTanggalIso(day, month, year) {
   const text = `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
@@ -30,28 +31,31 @@ async function execute(interaction) {
   const channelJadwal = cariChannel(interaction.guild, "jadwal");
 
   if (!tanggal) {
-    return interaction.editReply({
-      content:
-        "❌ Tanggal tidak valid. Cek kombinasi `tanggal`, `bulan`, dan `tahun`. Contoh valid: tanggal `30`, bulan `4`, tahun `2026`.",
-    });
+    return replyError(
+      interaction,
+      "Tanggal tidak valid",
+      "Cek kombinasi `tanggal`, `bulan`, dan `tahun`. Contoh valid: tanggal `30`, bulan `4`, tahun `2026`."
+    );
   }
 
   if (!isValidTime(jam)) {
-    return interaction.editReply({
-      content: "❌ Format jam mulai tidak valid. Gunakan format `HH:mm`, contoh: `20:00`.",
-    });
+    return replyError(
+      interaction,
+      "Jam mulai tidak valid",
+      "Gunakan format `HH:mm`, contoh: `20:00`."
+    );
   }
 
   if (selesai && !isValidTime(selesai)) {
-    return interaction.editReply({
-      content: "❌ Format jam selesai tidak valid. Gunakan format `HH:mm`, contoh: `21:00`.",
-    });
+    return replyError(
+      interaction,
+      "Jam selesai tidak valid",
+      "Gunakan format `HH:mm`, contoh: `21:00`."
+    );
   }
 
   if (!channelJadwal) {
-    return interaction.editReply({
-      content: "❌ Channel jadwal tidak ditemukan.",
-    });
+    return replyError(interaction, "Channel tidak ditemukan", "Channel jadwal tidak ditemukan.");
   }
 
   const embed = new EmbedBuilder()
@@ -83,19 +87,23 @@ async function execute(interaction) {
       catatan,
     });
 
-    const eventInfo = result.calendarEventId
-      ? `\n📆 Calendar Event ID: \`${result.calendarEventId}\``
-      : "";
-
-    return interaction.editReply({
-      content: `✅ Jadwal berhasil dikirim ke ${channelJadwal}, disimpan ke Google Sheet, dan dibuat di Google Calendar. ID: \`${id}\`${eventInfo}`,
-    });
+    return replySuccess(
+      interaction,
+      "Jadwal berhasil",
+      `Jadwal berhasil dikirim ke ${channelJadwal}, disimpan ke Google Sheet, dan dibuat di Google Calendar.`,
+      [
+        { name: "ID", value: `\`${id}\``, inline: true },
+        {
+          name: "Calendar Event ID",
+          value: result.calendarEventId ? `\`${result.calendarEventId}\`` : "-",
+          inline: true,
+        },
+      ]
+    );
   } catch (error) {
     console.error("Gagal membuat jadwal:", error);
 
-    return interaction.editReply({
-      content: `❌ Gagal membuat jadwal: ${error.message}`,
-    });
+    return replyError(interaction, "Gagal membuat jadwal", error.message);
   }
 }
 

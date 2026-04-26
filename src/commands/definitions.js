@@ -5,6 +5,10 @@ const commands = [
   new SlashCommandBuilder().setName("ping").setDescription("Cek apakah bot aktif"),
 
   new SlashCommandBuilder()
+    .setName("help")
+    .setDescription("Lihat daftar command Novatria Assistant"),
+
+  new SlashCommandBuilder()
     .setName("status")
     .setDescription("Cek konfigurasi channel dan Google Sheet"),
 

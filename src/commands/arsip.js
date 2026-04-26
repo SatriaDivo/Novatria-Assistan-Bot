@@ -3,6 +3,7 @@ const getTargetChannel = require("../utils/getTargetChannel");
 const kirimKeChannel = require("../utils/kirimKeChannel");
 const simpanKeSheet = require("../utils/sheet");
 const buatId = require("../utils/buatId");
+const { replyError, replySuccess } = require("../utils/replyEmbed");
 
 async function execute(interaction) {
   const id = buatId("arsip");
@@ -10,9 +11,7 @@ async function execute(interaction) {
   const channelArsip = await getTargetChannel(interaction.guild, "arsip", "arsip");
 
   if (!channelArsip) {
-    return interaction.editReply({
-      content: "❌ Channel arsip tidak ditemukan.",
-    });
+    return replyError(interaction, "Channel tidak ditemukan", "Channel arsip tidak ditemukan.");
   }
 
   const embed = new EmbedBuilder()
@@ -28,7 +27,7 @@ async function execute(interaction) {
   });
 
   if (!hasilKirim.ok) {
-    return interaction.editReply({ content: hasilKirim.error });
+    return replyError(interaction, "Gagal mengirim arsip", hasilKirim.error);
   }
 
   await simpanKeSheet("arsip", {
@@ -40,9 +39,9 @@ async function execute(interaction) {
     isi,
   });
 
-  await interaction.editReply({
-    content: `✅ Arsip berhasil dikirim ke ${channelArsip}. ID: \`${id}\``,
-  });
+  await replySuccess(interaction, "Arsip berhasil", `Arsip berhasil dikirim ke ${channelArsip}.`, [
+    { name: "ID", value: `\`${id}\`` },
+  ]);
 }
 
 module.exports = { execute };

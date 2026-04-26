@@ -1,5 +1,6 @@
 const { EmbedBuilder } = require("discord.js");
 const { listSheet } = require("../utils/sheet");
+const { replyError, replyInfo } = require("../utils/replyEmbed");
 
 const labels = {
   catat: "Catatan",
@@ -35,17 +36,13 @@ async function execute(interaction) {
   try {
     result = await listSheet(type, limit);
   } catch (error) {
-    return interaction.editReply({
-      content: `❌ ${error.message}`,
-    });
+    return replyError(interaction, "Gagal mengambil data", error.message);
   }
 
   const items = result.items || [];
 
   if (items.length === 0) {
-    return interaction.editReply({
-      content: `Belum ada data untuk tipe \`${type}\`.`,
-    });
+    return replyInfo(interaction, "Data kosong", `Belum ada data untuk tipe \`${type}\`.`);
   }
 
   const embed = new EmbedBuilder()

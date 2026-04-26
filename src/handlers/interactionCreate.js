@@ -1,4 +1,5 @@
 const ping = require("../commands/ping");
+const help = require("../commands/help");
 const status = require("../commands/status");
 const list = require("../commands/list");
 const hapus = require("../commands/hapus");
@@ -8,9 +9,11 @@ const link = require("../commands/link");
 const jadwal = require("../commands/jadwal");
 const arsip = require("../commands/arsip");
 const logActivity = require("../utils/logActivity");
+const { createEmbed } = require("../utils/replyEmbed");
 
 const commandHandlers = {
   ping,
+  help,
   status,
   list,
   hapus,
@@ -39,11 +42,14 @@ async function interactionCreate(interaction) {
 
   interaction.editReply = async (options) => {
     const content = typeof options === "string" ? options : options?.content;
+    const firstEmbed = typeof options === "object" ? options?.embeds?.[0]?.data : null;
+    const embedSummary = [firstEmbed?.title, firstEmbed?.description].filter(Boolean).join(" - ");
+    const replySummary = content || embedSummary;
 
-    if (content) {
-      activityMessage = content;
+    if (replySummary) {
+      activityMessage = replySummary;
 
-      if (content.trim().startsWith("❌")) {
+      if (replySummary.trim().startsWith("❌")) {
         activityStatus = "Gagal";
       }
     }
@@ -61,7 +67,13 @@ async function interactionCreate(interaction) {
     await logActivity(interaction, "Gagal", error.message || "Error tidak diketahui");
 
     const message = {
-      content: `❌ Terjadi error saat menjalankan command: ${error.message || "Error tidak diketahui"}`,
+      embeds: [
+        createEmbed(
+          "error",
+          "❌ Command gagal",
+          `Terjadi error saat menjalankan command: ${error.message || "Error tidak diketahui"}`
+        ),
+      ],
     };
 
     try {
