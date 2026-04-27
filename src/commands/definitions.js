@@ -130,14 +130,32 @@ const commands = [
     .addStringOption((option) =>
       option.setName("game").setDescription("Nama game").setRequired(true)
     )
-    .addStringOption((option) =>
-      option.setName("jam").setDescription("Jam mabar, format HH:mm").setRequired(true)
-    )
-    .addStringOption((option) =>
+    .addIntegerOption((option) =>
       option
         .setName("tanggal")
-        .setDescription("Tanggal mabar, format YYYY-MM-DD")
-        .setRequired(false)
+        .setDescription("Tanggal/hari, contoh: 30")
+        .setMinValue(1)
+        .setMaxValue(31)
+        .setRequired(true)
+    )
+    .addIntegerOption((option) =>
+      option
+        .setName("bulan")
+        .setDescription("Bulan, contoh: 4 untuk April")
+        .setMinValue(1)
+        .setMaxValue(12)
+        .setRequired(true)
+    )
+    .addIntegerOption((option) =>
+      option
+        .setName("tahun")
+        .setDescription("Tahun, contoh: 2026")
+        .setMinValue(2000)
+        .setMaxValue(2100)
+        .setRequired(true)
+    )
+    .addStringOption((option) =>
+      option.setName("jam").setDescription("Jam mabar, format HH:mm").setRequired(true)
     )
     .addStringOption((option) =>
       option.setName("catatan").setDescription("Catatan tambahan").setRequired(false)

@@ -1,5 +1,6 @@
 const { EmbedBuilder } = require("discord.js");
 const config = require("../config");
+const getMabarChannel = require("../utils/getMabarChannel");
 const getTargetChannel = require("../utils/getTargetChannel");
 const { cekIzinKirim } = require("../utils/kirimKeChannel");
 const { cekSheetStatus } = require("../utils/sheet");
@@ -12,9 +13,8 @@ const targets = [
   {
     label: "Mabar",
     key: "mabar",
-    keyword: "mabar",
-    fallbackKey: "jadwal",
-    fallbackKeyword: "jadwal",
+    keyword: "info-mabar",
+    fallbackKeyword: "jadwal-mabar/mabar-chat/jadwal",
   },
   { label: "Arsip", key: "arsip", keyword: "arsip" },
 ];
@@ -23,8 +23,18 @@ async function execute(interaction) {
   const fields = [];
 
   for (const target of targets) {
-    let channel = await getTargetChannel(interaction.guild, target.key, target.keyword);
+    let channel;
+    let source;
     let fallbackUsed = false;
+
+    if (target.key === "mabar") {
+      const result = await getMabarChannel(interaction.guild);
+      channel = result.channel;
+      source = result.source;
+      fallbackUsed = source.startsWith("fallback");
+    } else {
+      channel = await getTargetChannel(interaction.guild, target.key, target.keyword);
+    }
 
     if (!channel && target.fallbackKey) {
       channel = await getTargetChannel(
@@ -46,13 +56,15 @@ async function execute(interaction) {
     }
 
     const canSend = cekIzinKirim(interaction, channel);
-    const source = fallbackUsed
-      ? config.channels[target.fallbackKey]
-        ? "fallback ID .env jadwal"
-        : "fallback nama channel jadwal"
-      : config.channels[target.key]
-        ? "ID .env"
-        : "nama channel";
+    source =
+      source ||
+      (fallbackUsed
+        ? config.channels[target.fallbackKey]
+          ? "fallback ID .env jadwal"
+          : "fallback nama channel jadwal"
+        : config.channels[target.key]
+          ? "ID .env"
+          : "nama channel");
 
     fields.push({
       name: target.label,

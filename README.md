@@ -23,7 +23,7 @@ Novatria Assistant Bot adalah Discord bot berbasis Node.js dan discord.js v14 un
 - `/todo tugas` untuk mengirim todo ke channel todo-list dan menyimpan ke sheet `Todo`.
 - `/link url judul catatan` untuk mengirim link penting dan menyimpan ke sheet `Link`.
 - `/jadwal judul tanggal jam catatan` untuk mengirim jadwal dan menyimpan ke sheet `Jadwal`.
-- `/mabar game jam tanggal catatan` untuk mengirim jadwal mabar ke channel mabar/jadwal dan menyimpan ke sheet `Mabar`.
+- `/mabar game tanggal bulan tahun jam catatan` untuk mengirim jadwal mabar ke channel info-mabar dan menyimpan ke sheet `Mabar`.
 - `/arsip isi` untuk mengirim arsip dan menyimpan ke sheet `Arsip`.
 - `/ctfevent limit` untuk melihat lomba CTF upcoming dari CTFtime public API.
 - `/ctfcek` untuk mengirim daftar lomba CTF upcoming ke channel CTF.
@@ -76,6 +76,7 @@ Novatria-Bot
       ├─ ctftimeApi.js
       ├─ ctftimeNotifier.js
       ├─ cariChannel.js
+      ├─ getMabarChannel.js
       ├─ getTargetChannel.js
       ├─ kirimKeChannel.js
       ├─ logActivity.js
@@ -121,7 +122,7 @@ Catatan:
 - `SHEET_WEBAPP_URL` adalah URL deploy Google Apps Script Web App.
 - `SHEET_SECRET` harus sama dengan Script Property `SECRET_KEY` di Google Apps Script.
 - Channel ID bersifat opsional. Jika kosong, bot akan mencari channel berdasarkan nama, misalnya `catatan`, `todo-list`, `link-penting`, `jadwal`, `mabar`, dan `arsip`.
-- Untuk `/mabar`, bot memprioritaskan `CHANNEL_MABAR_ID` atau channel yang namanya mengandung `mabar`. Jika tidak ada, bot fallback ke channel `jadwal`.
+- Untuk `/mabar`, bot memprioritaskan channel yang namanya mengandung `info-mabar`. Jika tidak ada, bot memakai `CHANNEL_MABAR_ID`, lalu fallback ke `jadwal-mabar`, `mabar-chat`, atau `jadwal`.
 
 ## Menjalankan Bot
 
@@ -357,7 +358,7 @@ Nilai `SECRET_KEY` harus sama dengan `SHEET_SECRET` di `.env`. Setelah mengubah 
 /todo tugas: belajar discord bot
 /link url: https://example.com judul: Contoh catatan: testing link
 /jadwal judul: Meeting tanggal: 25 bulan: 4 tahun: 2026 jam: 20:00 selesai: 21:00 catatan: bahas bot
-/mabar game: Mobile Legends jam: 20:00 tanggal: 2026-04-30 catatan: push rank
+/mabar game: Mobile Legends tanggal: 30 bulan: 4 tahun: 2026 jam: 20:00 catatan: push rank
 /arsip isi: dokumen penting testing
 /ctfevent limit: 5
 /ctfcek
