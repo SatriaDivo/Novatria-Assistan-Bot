@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="assets/logo.png" alt="Novatria Assistant Bot Logo" width="180">
+</p>
+
 # Novatria Assistant Bot
 
 [![Node.js](https://img.shields.io/badge/Node.js-20.x-339933?logo=node.js&logoColor=white)](https://nodejs.org/)
