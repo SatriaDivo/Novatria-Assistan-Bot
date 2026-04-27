@@ -15,6 +15,7 @@ const ctfnotify = require("../commands/ctfnotify");
 const ctf = require("../commands/ctf");
 const writeup = require("../commands/writeup");
 const progress = require("../commands/progress");
+const tantangan = require("../commands/tantangan");
 const logActivity = require("../utils/logActivity");
 const { isCtfArea, isCtfCommandName } = require("../utils/ctfChannelGuard");
 const { createEmbed } = require("../utils/replyEmbed");
@@ -37,6 +38,7 @@ const commandHandlers = {
   ctf,
   writeup,
   progress,
+  tantangan,
 };
 
 async function interactionCreate(interaction) {
@@ -54,7 +56,7 @@ async function interactionCreate(interaction) {
   if (isCtfArea(interaction.channel) && !isCtfCommandName(interaction.commandName)) {
     return interaction.reply({
       content:
-        "❌ Di kategori CTF, gunakan command CTF saja: `/ctfevent`, `/ctfcek`, `/ctfnotify`, `/ctf`, `/writeup`, atau `/progress`.",
+        "❌ Di kategori CTF, gunakan command CTF saja: `/ctfevent`, `/ctfcek`, `/ctfnotify`, `/ctf`, `/writeup`, `/progress`, atau `/tantangan`.",
       flags: 64,
     });
   }

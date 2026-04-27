@@ -257,6 +257,19 @@ const commands = [
     .addStringOption((option) =>
       option.setName("catatan").setDescription("Catatan progress").setRequired(false)
     ),
+
+  new SlashCommandBuilder()
+    .setName("tantangan")
+    .setDescription("Tambah tantangan dari GitHub (auto-baca MD & download file)")
+    .addStringOption((option) =>
+      option.setName("url").setDescription("URL GitHub repo/folder challenge").setRequired(true)
+    )
+    .addStringOption((option) =>
+      option.setName("judul").setDescription("Judul tantangan (opsional)").setRequired(false)
+    )
+    .addStringOption((option) =>
+      option.setName("hadiah").setDescription("Hadiah tantangan, contoh: Rp500.000 (opsional)").setRequired(false)
+    ),
 ];
 
 module.exports = commands.map((command) => command.toJSON());

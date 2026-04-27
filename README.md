@@ -153,7 +153,7 @@ Buat category CTF di Discord, lalu siapkan channel berikut:
 └─ 🏆-ctf-progress
 ```
 
-Command CTF hanya bisa dipakai di channel yang namanya mengandung `ctf-command`, misalnya `🤖-ctf-command`. Siapa saja boleh memakai command CTF selama punya akses ke channel tersebut.
+Command CTF bisa dipakai di channel yang namanya mengandung `ctf-command`, misalnya `🤖-ctf-command`. Command CTF juga boleh dipakai di channel/category bot command pribadi, misalnya channel `bot-command` atau category yang namanya mengandung `bot`.
 
 Di channel/category CTF, bot juga menolak command non-CTF seperti `/catat`, `/todo`, `/jadwal`, dan command umum lain. Jadi area CTF tetap bersih untuk workflow CTF.
 

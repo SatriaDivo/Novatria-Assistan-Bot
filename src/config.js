@@ -6,6 +6,7 @@ module.exports = {
   clientId: process.env.CLIENT_ID,
   sheetWebAppUrl: process.env.SHEET_WEBAPP_URL,
   sheetSecret: process.env.SHEET_SECRET,
+  githubToken: process.env.GITHUB_TOKEN || "",
   channels: {
     catatan: process.env.CHANNEL_CATATAN_ID,
     todo: process.env.CHANNEL_TODO_ID,

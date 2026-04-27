@@ -1,5 +1,6 @@
 const CTF_COMMAND_KEYWORD = "ctf-command";
 const CTF_TARGET_PRIORITIES = ["ctf-info", "ctf-lomba", "ctf"];
+const BOT_COMMAND_KEYWORDS = ["bot-command", "bot-commands", "command-bot", "commands-bot"];
 const CTF_COMMAND_NAMES = new Set([
   "ctfevent",
   "ctfcek",
@@ -7,6 +8,7 @@ const CTF_COMMAND_NAMES = new Set([
   "ctf",
   "writeup",
   "progress",
+  "tantangan",
 ]);
 
 async function respondEphemeral(interaction, content) {
@@ -20,16 +22,27 @@ async function respondEphemeral(interaction, content) {
   await interaction.reply({ ...payload, flags: 64 });
 }
 
+function isBotCommandArea(channel) {
+  const channelName = channel?.name?.toLowerCase() || "";
+  const parentName = channel?.parent?.name?.toLowerCase() || "";
+
+  return (
+    BOT_COMMAND_KEYWORDS.some(
+      (keyword) => channelName.includes(keyword) || parentName.includes(keyword)
+    ) || parentName.includes("bot")
+  );
+}
+
 async function assertCtfCommandChannel(interaction) {
   const channelName = interaction.channel?.name?.toLowerCase() || "";
 
-  if (channelName.includes(CTF_COMMAND_KEYWORD)) {
+  if (channelName.includes(CTF_COMMAND_KEYWORD) || isBotCommandArea(interaction.channel)) {
     return true;
   }
 
   await respondEphemeral(
     interaction,
-    "❌ Command CTF hanya bisa dipakai di channel 🤖-ctf-command."
+    "❌ Command CTF hanya bisa dipakai di channel 🤖-ctf-command atau area bot command pribadi."
   );
 
   return false;
