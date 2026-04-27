@@ -22,7 +22,7 @@ Novatria Assistant Bot adalah Discord bot berbasis Node.js dan discord.js v14 un
 - `/catat isi` untuk mengirim catatan ke channel catatan dan menyimpan ke sheet `Catatan`.
 - `/todo tugas` untuk mengirim todo ke channel todo-list dan menyimpan ke sheet `Todo`.
 - `/link url judul catatan` untuk mengirim link penting dan menyimpan ke sheet `Link`.
-- `/jadwal judul tanggal jam catatan` untuk mengirim jadwal dan menyimpan ke sheet `Jadwal`.
+- `/jadwal judul jam tanggal bulan tahun selesai catatan` untuk mengirim jadwal dan menyimpan ke sheet `Jadwal`. `tanggal`, `bulan`, dan `tahun` opsional; jika kosong, bot memakai tanggal hari ini.
 - `/mabar game jam tanggal bulan tahun catatan` untuk mengirim jadwal mabar ke channel info-mabar dan menyimpan ke sheet `Mabar`. `tanggal`, `bulan`, dan `tahun` opsional; jika kosong, bot memakai tanggal hari ini.
 - `/arsip isi` untuk mengirim arsip dan menyimpan ke sheet `Arsip`.
 - `/ctfevent limit` untuk melihat lomba CTF upcoming dari CTFtime public API.
@@ -357,7 +357,8 @@ Nilai `SECRET_KEY` harus sama dengan `SHEET_SECRET` di `.env`. Setelah mengubah 
 /catat isi: test catatan
 /todo tugas: belajar discord bot
 /link url: https://example.com judul: Contoh catatan: testing link
-/jadwal judul: Meeting tanggal: 25 bulan: 4 tahun: 2026 jam: 20:00 selesai: 21:00 catatan: bahas bot
+/jadwal judul: Meeting jam: 20:00 selesai: 21:00 catatan: bahas bot hari ini
+/jadwal judul: Meeting jam: 20:00 tanggal: 25 bulan: 4 tahun: 2026 selesai: 21:00 catatan: bahas bot
 /mabar game: Mobile Legends jam: 20:00 catatan: push rank hari ini
 /mabar game: Mobile Legends tanggal: 30 bulan: 4 tahun: 2026 jam: 20:00 catatan: push rank
 /arsip isi: dokumen penting testing

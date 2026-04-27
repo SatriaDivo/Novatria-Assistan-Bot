@@ -14,6 +14,33 @@ function buatTanggalIso(day, month, year) {
   return valid ? text : null;
 }
 
+function getTanggalHariIni() {
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Jakarta",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(new Date());
+
+  const values = Object.fromEntries(parts.map((part) => [part.type, part.value]));
+
+  return `${values.year}-${values.month}-${values.day}`;
+}
+
+function getTanggalJadwal(day, month, year) {
+  const hasDatePart = day !== null || month !== null || year !== null;
+
+  if (!hasDatePart) {
+    return { tanggal: getTanggalHariIni(), incomplete: false };
+  }
+
+  if (day === null || month === null || year === null) {
+    return { tanggal: null, incomplete: true };
+  }
+
+  return { tanggal: buatTanggalIso(day, month, year), incomplete: false };
+}
+
 function isValidTime(text) {
   return /^([01]\d|2[0-3]):[0-5]\d$/.test(text);
 }
@@ -24,11 +51,20 @@ async function execute(interaction) {
   const tanggalHari = interaction.options.getInteger("tanggal");
   const bulan = interaction.options.getInteger("bulan");
   const tahun = interaction.options.getInteger("tahun");
-  const tanggal = buatTanggalIso(tanggalHari, bulan, tahun);
+  const tanggalJadwal = getTanggalJadwal(tanggalHari, bulan, tahun);
+  const tanggal = tanggalJadwal.tanggal;
   const jam = interaction.options.getString("jam");
   const selesai = interaction.options.getString("selesai") || "";
   const catatan = interaction.options.getString("catatan") || "-";
   const channelJadwal = cariChannel(interaction.guild, "jadwal");
+
+  if (tanggalJadwal.incomplete) {
+    return replyError(
+      interaction,
+      "Tanggal belum lengkap",
+      "Isi `tanggal`, `bulan`, dan `tahun` sekaligus, atau kosongkan semuanya agar memakai tanggal hari ini."
+    );
+  }
 
   if (!tanggal) {
     return replyError(

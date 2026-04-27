@@ -90,32 +90,32 @@ const commands = [
     .addStringOption((option) =>
       option.setName("judul").setDescription("Judul jadwal").setRequired(true)
     )
+    .addStringOption((option) =>
+      option.setName("jam").setDescription("Jam mulai, format HH:mm").setRequired(true)
+    )
     .addIntegerOption((option) =>
       option
         .setName("tanggal")
-        .setDescription("Tanggal/hari, contoh: 30")
+        .setDescription("Tanggal/hari, contoh: 30. Kosongkan untuk hari ini")
         .setMinValue(1)
         .setMaxValue(31)
-        .setRequired(true)
+        .setRequired(false)
     )
     .addIntegerOption((option) =>
       option
         .setName("bulan")
-        .setDescription("Bulan, contoh: 4 untuk April")
+        .setDescription("Bulan, contoh: 4 untuk April. Kosongkan untuk hari ini")
         .setMinValue(1)
         .setMaxValue(12)
-        .setRequired(true)
+        .setRequired(false)
     )
     .addIntegerOption((option) =>
       option
         .setName("tahun")
-        .setDescription("Tahun, contoh: 2026")
+        .setDescription("Tahun, contoh: 2026. Kosongkan untuk hari ini")
         .setMinValue(2000)
         .setMaxValue(2100)
-        .setRequired(true)
-    )
-    .addStringOption((option) =>
-      option.setName("jam").setDescription("Jam mulai, format HH:mm").setRequired(true)
+        .setRequired(false)
     )
     .addStringOption((option) =>
       option.setName("selesai").setDescription("Jam selesai, format HH:mm").setRequired(false)
