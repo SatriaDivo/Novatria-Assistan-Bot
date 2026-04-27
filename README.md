@@ -6,7 +6,7 @@
 [![CI](https://github.com/SatriaDivo/Novatria-Assistan-Bot/actions/workflows/ci.yml/badge.svg)](https://github.com/SatriaDivo/Novatria-Assistan-Bot/actions/workflows/ci.yml)
 [![Project Status](https://img.shields.io/badge/status-active-brightgreen.svg)](#)
 
-Novatria Assistant Bot adalah Discord bot berbasis Node.js dan discord.js v14 untuk mencatat catatan, todo, link penting, jadwal, dan arsip ke channel Discord sekaligus menyimpan datanya ke Google Sheet melalui Google Apps Script Web App.
+Novatria Assistant Bot adalah Discord bot berbasis Node.js dan discord.js v14 untuk mencatat catatan, todo, link penting, jadwal, mabar, dan arsip ke channel Discord sekaligus menyimpan datanya ke Google Sheet melalui Google Apps Script Web App.
 
 ## Features
 
@@ -19,6 +19,7 @@ Novatria Assistant Bot adalah Discord bot berbasis Node.js dan discord.js v14 un
 - `/todo tugas` untuk mengirim todo ke channel todo-list dan menyimpan ke sheet `Todo`.
 - `/link url judul catatan` untuk mengirim link penting dan menyimpan ke sheet `Link`.
 - `/jadwal judul tanggal jam catatan` untuk mengirim jadwal dan menyimpan ke sheet `Jadwal`.
+- `/mabar game jam tanggal catatan` untuk mengirim jadwal mabar ke channel mabar/jadwal dan menyimpan ke sheet `Mabar`.
 - `/arsip isi` untuk mengirim arsip dan menyimpan ke sheet `Arsip`.
 - `/ctfevent limit` untuk melihat lomba CTF upcoming dari CTFtime public API.
 - `/ctfcek` untuk mengirim daftar lomba CTF upcoming ke channel CTF.
@@ -55,6 +56,7 @@ Novatria-Bot
    │  ├─ todo.js
    │  ├─ link.js
    │  ├─ jadwal.js
+   │  ├─ mabar.js
    │  ├─ arsip.js
    │  ├─ ctfevent.js
    │  ├─ ctfcek.js
@@ -103,6 +105,7 @@ CHANNEL_CATATAN_ID=
 CHANNEL_TODO_ID=
 CHANNEL_LINK_ID=
 CHANNEL_JADWAL_ID=
+CHANNEL_MABAR_ID=
 CHANNEL_ARSIP_ID=
 CHANNEL_LOG_ID=
 ```
@@ -113,7 +116,8 @@ Catatan:
 - `TOKEN` adalah token bot dari Discord Developer Portal.
 - `SHEET_WEBAPP_URL` adalah URL deploy Google Apps Script Web App.
 - `SHEET_SECRET` harus sama dengan Script Property `SECRET_KEY` di Google Apps Script.
-- Channel ID bersifat opsional. Jika kosong, bot akan mencari channel berdasarkan nama, misalnya `catatan`, `todo-list`, `link-penting`, `jadwal`, dan `arsip`.
+- Channel ID bersifat opsional. Jika kosong, bot akan mencari channel berdasarkan nama, misalnya `catatan`, `todo-list`, `link-penting`, `jadwal`, `mabar`, dan `arsip`.
+- Untuk `/mabar`, bot memprioritaskan `CHANNEL_MABAR_ID` atau channel yang namanya mengandung `mabar`. Jika tidak ada, bot fallback ke channel `jadwal`.
 
 ## Menjalankan Bot
 
@@ -181,7 +185,7 @@ Discord tidak mengizinkan bot token biasa mengubah visibilitas command per chann
 2. Pilih **Integrations**.
 3. Pilih aplikasi **Novatria Assistant** lalu klik **Manage**.
 4. Untuk channel/category CTF, nonaktifkan command non-CTF:
-   `/ping`, `/help`, `/status`, `/list`, `/hapus`, `/catat`, `/todo`, `/link`, `/jadwal`, `/arsip`.
+   `/ping`, `/help`, `/status`, `/list`, `/hapus`, `/catat`, `/todo`, `/link`, `/jadwal`, `/mabar`, `/arsip`.
 5. Biarkan command CTF aktif:
    `/ctfevent`, `/ctfcek`, `/ctfnotify`, `/ctf`, `/writeup`, `/progress`.
 
@@ -324,7 +328,7 @@ Pastikan Apps Script:
 - Menyimpan, membaca, dan menghapus data berdasarkan `type`.
 - Dideploy sebagai Web App.
 
-Kode lengkap Apps Script tersedia di `google-apps-script.js`. Jika memakai fitur `/status`, `/list`, dan `/hapus`, paste ulang isi file itu ke Google Apps Script lalu deploy versi Web App terbaru.
+Kode lengkap Apps Script tersedia di `google-apps-script.js`. Apps Script mendukung sheet `Catatan`, `Todo`, `Link`, `Jadwal`, `Mabar`, `Arsip`, dan `Log`. Jika memakai fitur `/status`, `/list`, `/hapus`, dan `/mabar`, paste ulang isi file itu ke Google Apps Script lalu deploy versi Web App terbaru.
 
 ### Setup Script Properties
 
@@ -349,6 +353,7 @@ Nilai `SECRET_KEY` harus sama dengan `SHEET_SECRET` di `.env`. Setelah mengubah 
 /todo tugas: belajar discord bot
 /link url: https://example.com judul: Contoh catatan: testing link
 /jadwal judul: Meeting tanggal: 25 bulan: 4 tahun: 2026 jam: 20:00 selesai: 21:00 catatan: bahas bot
+/mabar game: Mobile Legends jam: 20:00 tanggal: 2026-04-30 catatan: push rank
 /arsip isi: dokumen penting testing
 /ctfevent limit: 5
 /ctfcek
