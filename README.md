@@ -14,27 +14,46 @@ Novatria Assistant Bot adalah Discord bot berbasis Node.js dan discord.js v14 un
 
 ## Features
 
-- `/ping` untuk mengecek bot aktif.
-- `/help` untuk melihat daftar command.
-- `/status` untuk mengecek channel target, permission bot, dan konfigurasi Google Sheet.
-- `/list tipe limit` untuk melihat data terbaru beserta ID sebelum menghapus.
-- `/hapus tipe id` untuk menghapus data dari Google Sheet berdasarkan ID.
-- `/catat isi` untuk mengirim catatan ke channel catatan dan menyimpan ke sheet `Catatan`.
-- `/todo tugas` untuk mengirim todo ke channel todo-list dan menyimpan ke sheet `Todo`.
-- `/link url judul catatan` untuk mengirim link penting dan menyimpan ke sheet `Link`.
-- `/jadwal judul jam tanggal bulan tahun selesai catatan` untuk mengirim jadwal dan menyimpan ke sheet `Jadwal`. `tanggal`, `bulan`, dan `tahun` opsional; jika kosong, bot memakai tanggal hari ini.
-- `/mabar game jam tanggal bulan tahun catatan` untuk mengirim jadwal mabar ke channel info-mabar dan menyimpan ke sheet `Mabar`. `tanggal`, `bulan`, dan `tahun` opsional; jika kosong, bot memakai tanggal hari ini.
-- `/arsip isi` untuk mengirim arsip dan menyimpan ke sheet `Arsip`.
-- `/ctfevent limit` untuk melihat lomba CTF upcoming dari CTFtime public API.
-- `/ctfcek` untuk mengirim daftar lomba CTF upcoming ke channel CTF.
-- `/ctfnotify status` untuk mengaktifkan atau mematikan notifikasi otomatis CTFtime.
-- `/ctf nama platform url kategori catatan` untuk menambahkan challenge CTF.
-- `/writeup judul challenge ringkasan url` untuk menyimpan writeup CTF.
-- `/progress challenge status catatan` untuk update progress challenge CTF.
-- Google Sheet integration.
-- Google Calendar integration untuk event jadwal.
-- Auto-log activity ke channel `log-aktivitas` atau channel log dari `CHANNEL_LOG_ID`.
-- Embed message untuk tampilan command yang lebih rapi.
+### 🤖 Umum
+
+| Command | Deskripsi |
+|---------|-----------|
+| `/ping` | Cek apakah bot aktif |
+| `/help` | Lihat daftar semua command |
+| `/status` | Cek channel target, permission bot, dan konfigurasi Google Sheet |
+| `/list tipe limit` | Lihat data terbaru beserta ID (untuk keperluan hapus) |
+| `/hapus tipe id` | Hapus data dari Google Sheet berdasarkan ID |
+
+### 📝 Produktivitas & Catatan
+
+| Command | Deskripsi |
+|---------|-----------|
+| `/catat isi` | Kirim catatan ke channel catatan → sheet `Catatan` |
+| `/todo tugas` | Kirim todo ke channel todo-list → sheet `Todo` |
+| `/link url judul catatan` | Kirim link penting → sheet `Link` |
+| `/jadwal judul jam ...` | Kirim jadwal → sheet `Jadwal`. Opsi `tanggal`, `bulan`, `tahun`, `selesai`, `catatan` bersifat opsional |
+| `/mabar game jam ...` | Kirim jadwal mabar ke channel info-mabar → sheet `Mabar`. Opsi `tanggal`, `bulan`, `tahun`, `catatan` bersifat opsional |
+| `/arsip isi` | Kirim arsip → sheet `Arsip` |
+
+### 🏴 CTF
+
+| Command | Deskripsi |
+|---------|-----------|
+| `/ctfevent limit` | Lihat lomba CTF upcoming dari CTFtime public API |
+| `/ctfcek` | Kirim daftar lomba CTF upcoming ke channel ctf-info |
+| `/ctfnotify status` | Aktifkan/matikan notifikasi otomatis CTFtime (cek setiap 6 jam) |
+| `/ctf nama platform url kategori catatan` | Tambah challenge CTF ke channel ctf-target |
+| `/tantangan url judul hadiah` | Tambah tantangan dari GitHub — auto-baca file `.md` & download file ke ctf-info. Opsi `judul` dan `hadiah` opsional |
+| `/writeup judul challenge ringkasan url` | Simpan writeup CTF ke channel ctf-writeup |
+| `/progress challenge status catatan` | Update progress challenge CTF ke channel ctf-progress |
+
+### ⚙️ Integrasi & Sistem
+
+- **Google Sheet** — semua data command tersimpan otomatis via Google Apps Script Web App.
+- **Google Calendar** — event jadwal otomatis dibuat di Google Calendar.
+- **Auto-log** — setiap aktivitas command dicatat ke channel `log-aktivitas` atau `CHANNEL_LOG_ID`.
+- **Embed message** — tampilan command rapi menggunakan Discord embed.
+- **CTF Channel Guard** — di area CTF, hanya command CTF yang diizinkan; command umum ditolak otomatis.
 
 ## Struktur Folder
 
@@ -66,6 +85,7 @@ Novatria-Bot
    │  ├─ ctfcek.js
    │  ├─ ctfnotify.js
    │  ├─ ctf.js
+   │  ├─ tantangan.js
    │  ├─ writeup.js
    │  └─ progress.js
    ├─ handlers
@@ -75,6 +95,7 @@ Novatria-Bot
       ├─ ctfChannels.js
       ├─ ctftimeApi.js
       ├─ ctftimeNotifier.js
+      ├─ githubFetcher.js
       ├─ cariChannel.js
       ├─ getMabarChannel.js
       ├─ getTargetChannel.js
@@ -113,6 +134,9 @@ CHANNEL_JADWAL_ID=
 CHANNEL_MABAR_ID=
 CHANNEL_ARSIP_ID=
 CHANNEL_LOG_ID=
+
+# Opsional: GitHub Personal Access Token untuk /tantangan (menghindari rate limit)
+GITHUB_TOKEN=
 ```
 
 Catatan:
@@ -192,7 +216,7 @@ Discord tidak mengizinkan bot token biasa mengubah visibilitas command per chann
 4. Untuk channel/category CTF, nonaktifkan command non-CTF:
    `/ping`, `/help`, `/status`, `/list`, `/hapus`, `/catat`, `/todo`, `/link`, `/jadwal`, `/mabar`, `/arsip`.
 5. Biarkan command CTF aktif:
-   `/ctfevent`, `/ctfcek`, `/ctfnotify`, `/ctf`, `/writeup`, `/progress`.
+   `/ctfevent`, `/ctfcek`, `/ctfnotify`, `/ctf`, `/tantangan`, `/writeup`, `/progress`.
 
 Kalau pengaturan visibility belum dilakukan di Discord, command non-CTF mungkin masih terlihat di slash menu, tetapi bot tetap akan menolaknya saat dipakai di area CTF.
 
@@ -236,6 +260,12 @@ Menyimpan writeup ke channel `📝-ctf-writeup` dan menyimpannya sebagai `ctf_wr
 ```
 
 Mengirim update progress ke channel `🏆-ctf-progress` dan menyimpannya sebagai `ctf_progress` jika Google Sheet aktif.
+
+```text
+/tantangan url: https://github.com/user/ctf-challenges/tree/main/web/sqli-basic judul: SQL Injection Basic hadiah: Rp500.000
+```
+
+Menambahkan tantangan dari GitHub ke channel `🧩-ctf-info`. Bot otomatis membaca file `.md` dan menampilkannya sebagai embed, serta mengirim file lainnya sebagai attachment. Opsi `judul` dan `hadiah` bersifat opsional.
 
 ## Menjalankan Dengan Docker di Windows
 
@@ -366,6 +396,7 @@ Nilai `SECRET_KEY` harus sama dengan `SHEET_SECRET` di `.env`. Setelah mengubah 
 /ctfcek
 /ctfnotify status: on
 /ctf nama: SQL Injection Lab platform: TryHackMe kategori: web catatan: latihan auth bypass
+/tantangan url: https://github.com/user/ctf-challenges/tree/main/web/sqli judul: SQL Injection hadiah: Sertifikat
 /writeup judul: SQL Injection Lab challenge: SQL Injection Lab ringkasan: payload dan step exploit
 /progress challenge: SQL Injection Lab status: Sedang dikerjakan catatan: sudah dapat hint pertama
 ```
