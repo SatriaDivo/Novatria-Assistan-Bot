@@ -1,11 +1,12 @@
 const FALLBACK_SPREADSHEET_ID = "LINK-SHEET-ID-ANDA";
-const SCRIPT_VERSION = "2026-04-25-status-v1";
+const SCRIPT_VERSION = "2026-04-27-mabar-v1";
 
 const ID_PREFIXES = {
   catat: "CAT",
   todo: "TODO",
   link: "LINK",
   jadwal: "JAD",
+  mabar: "MAB",
   arsip: "ARS",
   log: "LOG",
 };
@@ -82,6 +83,33 @@ const CONFIG = {
       data.selesai || "",
       data.catatan,
       data.calendarEventId || "",
+    ],
+  },
+  mabar: {
+    sheet: "Mabar",
+    header: [
+      "ID",
+      "Waktu",
+      "User",
+      "User ID",
+      "Server",
+      "Channel",
+      "Game",
+      "Tanggal",
+      "Jam",
+      "Catatan",
+    ],
+    row: (data) => [
+      data.id,
+      new Date(),
+      data.user,
+      data.userId,
+      data.server,
+      data.channel,
+      data.game,
+      data.tanggal || "",
+      data.jam,
+      data.catatan,
     ],
   },
   arsip: {

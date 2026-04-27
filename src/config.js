@@ -11,6 +11,7 @@ module.exports = {
     todo: process.env.CHANNEL_TODO_ID,
     link: process.env.CHANNEL_LINK_ID,
     jadwal: process.env.CHANNEL_JADWAL_ID,
+    mabar: process.env.CHANNEL_MABAR_ID,
     arsip: process.env.CHANNEL_ARSIP_ID,
     log: process.env.CHANNEL_LOG_ID,
   },

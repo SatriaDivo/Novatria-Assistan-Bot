@@ -25,6 +25,7 @@ const commands = [
           { name: "Todo", value: "todo" },
           { name: "Link", value: "link" },
           { name: "Jadwal", value: "jadwal" },
+          { name: "Mabar", value: "mabar" },
           { name: "Arsip", value: "arsip" }
         )
     )
@@ -50,6 +51,7 @@ const commands = [
           { name: "Todo", value: "todo" },
           { name: "Link", value: "link" },
           { name: "Jadwal", value: "jadwal" },
+          { name: "Mabar", value: "mabar" },
           { name: "Arsip", value: "arsip" }
         )
     )
@@ -117,6 +119,25 @@ const commands = [
     )
     .addStringOption((option) =>
       option.setName("selesai").setDescription("Jam selesai, format HH:mm").setRequired(false)
+    )
+    .addStringOption((option) =>
+      option.setName("catatan").setDescription("Catatan tambahan").setRequired(false)
+    ),
+
+  new SlashCommandBuilder()
+    .setName("mabar")
+    .setDescription("Buat jadwal mabar")
+    .addStringOption((option) =>
+      option.setName("game").setDescription("Nama game").setRequired(true)
+    )
+    .addStringOption((option) =>
+      option.setName("jam").setDescription("Jam mabar, format HH:mm").setRequired(true)
+    )
+    .addStringOption((option) =>
+      option
+        .setName("tanggal")
+        .setDescription("Tanggal mabar, format YYYY-MM-DD")
+        .setRequired(false)
     )
     .addStringOption((option) =>
       option.setName("catatan").setDescription("Catatan tambahan").setRequired(false)

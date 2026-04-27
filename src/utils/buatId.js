@@ -3,6 +3,7 @@ const prefixes = {
   todo: "TODO",
   link: "LINK",
   jadwal: "JAD",
+  mabar: "MAB",
   arsip: "ARS",
 };
 

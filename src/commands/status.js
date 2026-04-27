@@ -9,6 +9,13 @@ const targets = [
   { label: "Todo", key: "todo", keyword: "todo-list" },
   { label: "Link", key: "link", keyword: "link-penting" },
   { label: "Jadwal", key: "jadwal", keyword: "jadwal" },
+  {
+    label: "Mabar",
+    key: "mabar",
+    keyword: "mabar",
+    fallbackKey: "jadwal",
+    fallbackKeyword: "jadwal",
+  },
   { label: "Arsip", key: "arsip", keyword: "arsip" },
 ];
 
@@ -16,18 +23,36 @@ async function execute(interaction) {
   const fields = [];
 
   for (const target of targets) {
-    const channel = await getTargetChannel(interaction.guild, target.key, target.keyword);
+    let channel = await getTargetChannel(interaction.guild, target.key, target.keyword);
+    let fallbackUsed = false;
+
+    if (!channel && target.fallbackKey) {
+      channel = await getTargetChannel(
+        interaction.guild,
+        target.fallbackKey,
+        target.fallbackKeyword
+      );
+      fallbackUsed = Boolean(channel);
+    }
 
     if (!channel) {
       fields.push({
         name: target.label,
-        value: `❌ Channel tidak ditemukan untuk keyword \`${target.keyword}\`.`,
+        value: target.fallbackKeyword
+          ? `❌ Channel tidak ditemukan untuk keyword \`${target.keyword}\` atau \`${target.fallbackKeyword}\`.`
+          : `❌ Channel tidak ditemukan untuk keyword \`${target.keyword}\`.`,
       });
       continue;
     }
 
     const canSend = cekIzinKirim(interaction, channel);
-    const source = config.channels[target.key] ? "ID .env" : "nama channel";
+    const source = fallbackUsed
+      ? config.channels[target.fallbackKey]
+        ? "fallback ID .env jadwal"
+        : "fallback nama channel jadwal"
+      : config.channels[target.key]
+        ? "ID .env"
+        : "nama channel";
 
     fields.push({
       name: target.label,

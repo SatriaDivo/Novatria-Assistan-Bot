@@ -7,6 +7,7 @@ const labels = {
   todo: "Todo",
   link: "Link",
   jadwal: "Jadwal",
+  mabar: "Mabar",
   arsip: "Arsip",
 };
 
@@ -18,6 +19,9 @@ function ambilRingkasan(type, item) {
     const jamSelesai = item["Jam Selesai"] ? ` - ${item["Jam Selesai"]}` : "";
 
     return `${item.Judul || "-"}\n${item.Tanggal || "-"} ${jamMulai}${jamSelesai}`;
+  }
+  if (type === "mabar") {
+    return `${item.Game || "-"}\n${item.Tanggal || "Tanggal belum ditentukan"} ${item.Jam || "-"}`;
   }
 
   return item.Isi || "-";

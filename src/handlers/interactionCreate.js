@@ -7,6 +7,7 @@ const catat = require("../commands/catat");
 const todo = require("../commands/todo");
 const link = require("../commands/link");
 const jadwal = require("../commands/jadwal");
+const mabar = require("../commands/mabar");
 const arsip = require("../commands/arsip");
 const ctfevent = require("../commands/ctfevent");
 const ctfcek = require("../commands/ctfcek");
@@ -28,6 +29,7 @@ const commandHandlers = {
   todo,
   link,
   jadwal,
+  mabar,
   arsip,
   ctfevent,
   ctfcek,
