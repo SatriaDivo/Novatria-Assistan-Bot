@@ -162,9 +162,10 @@ async function execute(interaction) {
     .setTimestamp();
 
   const channel = targetChannel;
+  const submitterText = `👤 Tantangan dikirim oleh ${interaction.user} (${interaction.user.tag})`;
 
   // Kirim header embed ke ctf-info
-  await channel.send({ embeds: [headerEmbed] });
+  await channel.send({ content: submitterText, embeds: [headerEmbed] });
 
   // Proses file markdown dengan batas aman agar folder besar tidak spam channel.
   for (const mdFile of mdFilesToProcess) {
