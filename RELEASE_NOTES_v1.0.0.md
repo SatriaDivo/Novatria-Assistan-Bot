@@ -40,13 +40,14 @@ Initial stable release for Novatria Assistant Bot, a Discord assistant for produ
 
 - Added `/ctfevent` to show upcoming CTF events from the CTFtime public API.
 - Added `/ctfcek` to send upcoming CTF event information into a CTF channel.
-- Added `/ctfnotify` to enable or disable automatic CTFtime notifications.
+- Added `/ctfnotify` to enable or disable automatic H-3 CTFtime notifications.
 - Added `/ctf` to track CTF challenges in the target CTF channel.
 - Added `/tantangan` to import a challenge from GitHub, read markdown files into embeds, and attach downloadable files when possible.
 - Added `/writeup` to save CTF writeups.
 - Added `/progress` to track challenge progress with structured status values.
 - Added CTF channel guard so CTF commands are limited to `ctf-command` or bot command areas.
 - Added CTF area protection so non-CTF commands are rejected inside CTF channels or categories.
+- Added automatic CTFtime H-3 scans at 00:00, 08:00, and 17:00 WIB, plus one startup scan when the bot comes online.
 
 ### Integrations
 

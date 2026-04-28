@@ -12,7 +12,9 @@ async function execute(interaction) {
   setCtftimeNotifyEnabled(enabled);
 
   await interaction.editReply(
-    enabled ? "✅ Notifikasi CTFtime aktif." : "✅ Notifikasi CTFtime mati."
+    enabled
+      ? "✅ Notifikasi CTFtime H-3 aktif. Bot akan scan saat hidup, lalu pada 00:00, 08:00, dan 17:00 WIB."
+      : "✅ Notifikasi CTFtime mati."
   );
 }
 

@@ -18,7 +18,7 @@ async function execute(interaction) {
       { name: "/hapus", value: "Hapus data tertentu berdasarkan ID.", inline: true },
       { name: "/ctfevent", value: "Lihat lomba CTF upcoming dari CTFtime.", inline: true },
       { name: "/ctfcek", value: "Kirim info CTF ke channel CTF.", inline: true },
-      { name: "/ctfnotify", value: "Atur notifikasi otomatis CTFtime.", inline: true },
+      { name: "/ctfnotify", value: "Atur notifikasi otomatis H-3 CTFtime.", inline: true },
       { name: "/ctf", value: "Tambah challenge CTF.", inline: true },
       { name: "/writeup", value: "Simpan writeup CTF.", inline: true },
       { name: "/progress", value: "Update progress challenge CTF.", inline: true }

@@ -16,36 +16,36 @@ Novatria Assistant Bot adalah Discord bot berbasis Node.js dan discord.js v14 un
 
 ### 🤖 Umum
 
-| Command | Deskripsi |
-|---------|-----------|
-| `/ping` | Cek apakah bot aktif |
-| `/help` | Lihat daftar semua command |
-| `/status` | Cek channel target, permission bot, dan konfigurasi Google Sheet |
-| `/list tipe limit` | Lihat data terbaru beserta ID (untuk keperluan hapus) |
-| `/hapus tipe id` | Hapus data dari Google Sheet berdasarkan ID |
+| Command            | Deskripsi                                                        |
+| ------------------ | ---------------------------------------------------------------- |
+| `/ping`            | Cek apakah bot aktif                                             |
+| `/help`            | Lihat daftar semua command                                       |
+| `/status`          | Cek channel target, permission bot, dan konfigurasi Google Sheet |
+| `/list tipe limit` | Lihat data terbaru beserta ID (untuk keperluan hapus)            |
+| `/hapus tipe id`   | Hapus data dari Google Sheet berdasarkan ID                      |
 
 ### 📝 Produktivitas & Catatan
 
-| Command | Deskripsi |
-|---------|-----------|
-| `/catat isi` | Kirim catatan ke channel catatan → sheet `Catatan` |
-| `/todo tugas` | Kirim todo ke channel todo-list → sheet `Todo` |
-| `/link url judul catatan` | Kirim link penting → sheet `Link` |
-| `/jadwal judul jam ...` | Kirim jadwal → sheet `Jadwal`. Opsi `tanggal`, `bulan`, `tahun`, `selesai`, `catatan` bersifat opsional |
-| `/mabar game jam ...` | Kirim jadwal mabar ke channel info-mabar → sheet `Mabar`. Opsi `tanggal`, `bulan`, `tahun`, `catatan` bersifat opsional |
-| `/arsip isi` | Kirim arsip → sheet `Arsip` |
+| Command                   | Deskripsi                                                                                                               |
+| ------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| `/catat isi`              | Kirim catatan ke channel catatan → sheet `Catatan`                                                                      |
+| `/todo tugas`             | Kirim todo ke channel todo-list → sheet `Todo`                                                                          |
+| `/link url judul catatan` | Kirim link penting → sheet `Link`                                                                                       |
+| `/jadwal judul jam ...`   | Kirim jadwal → sheet `Jadwal`. Opsi `tanggal`, `bulan`, `tahun`, `selesai`, `catatan` bersifat opsional                 |
+| `/mabar game jam ...`     | Kirim jadwal mabar ke channel info-mabar → sheet `Mabar`. Opsi `tanggal`, `bulan`, `tahun`, `catatan` bersifat opsional |
+| `/arsip isi`              | Kirim arsip → sheet `Arsip`                                                                                             |
 
 ### 🏴 CTF
 
-| Command | Deskripsi |
-|---------|-----------|
-| `/ctfevent limit` | Lihat lomba CTF upcoming dari CTFtime public API |
-| `/ctfcek` | Kirim daftar lomba CTF upcoming ke channel ctf-info |
-| `/ctfnotify status` | Aktifkan/matikan notifikasi otomatis CTFtime (cek setiap 6 jam) |
-| `/ctf nama platform url kategori catatan` | Tambah challenge CTF ke channel ctf-target |
-| `/tantangan url judul hadiah` | Tambah tantangan dari GitHub — auto-baca file `.md` & download file ke ctf-info. Opsi `judul` dan `hadiah` opsional |
-| `/writeup judul challenge ringkasan url` | Simpan writeup CTF ke channel ctf-writeup |
-| `/progress challenge status catatan` | Update progress challenge CTF ke channel ctf-progress |
+| Command                                   | Deskripsi                                                                                                           |
+| ----------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| `/ctfevent limit`                         | Lihat lomba CTF upcoming dari CTFtime public API                                                                    |
+| `/ctfcek`                                 | Kirim daftar lomba CTF upcoming ke channel ctf-info                                                                 |
+| `/ctfnotify status`                       | Aktifkan/matikan notifikasi otomatis H-3 CTFtime                                                                    |
+| `/ctf nama platform url kategori catatan` | Tambah challenge CTF ke channel ctf-target                                                                          |
+| `/tantangan url judul hadiah`             | Tambah tantangan dari GitHub — auto-baca file `.md` & download file ke ctf-info. Opsi `judul` dan `hadiah` opsional |
+| `/writeup judul challenge ringkasan url`  | Simpan writeup CTF ke channel ctf-writeup                                                                           |
+| `/progress challenge status catatan`      | Update progress challenge CTF ke channel ctf-progress                                                               |
 
 ### ⚙️ Integrasi & Sistem
 
@@ -239,9 +239,11 @@ Mengirim embed daftar lomba CTF upcoming ke channel tujuan. Bot mencari channel 
 /ctfnotify status: off
 ```
 
-Mengaktifkan atau mematikan notifikasi otomatis CTFtime. Saat aktif, bot mengecek event CTFtime setiap 6 jam dan mengirim event baru ke channel CTF tanpa mengirim ulang event yang sama.
+Mengaktifkan atau mematikan notifikasi otomatis H-3 CTFtime. Saat aktif, bot mengirim info lomba yang mulai dalam 3 hari ke depan ke channel CTF tanpa mengirim ulang event yang sama.
 
-Status notifikasi disimpan di `data/ctftime-settings.json`. Event yang sudah pernah dikirim disimpan di `data/ctftime-seen.json`. File JSON ini dibuat otomatis saat bot berjalan dan tidak perlu dicommit.
+Bot scan otomatis pada jam `00:00`, `08:00`, dan `17:00` WIB. Saat bot baru hidup atau sempat offline, bot juga langsung scan sekali setelah startup agar event H-3 yang terlewat tetap terdeteksi.
+
+Status notifikasi disimpan di `data/ctftime-settings.json`. Event H-3 yang sudah pernah dikirim disimpan di `data/ctftime-seen.json`. File JSON ini dibuat otomatis saat bot berjalan dan tidak perlu dicommit.
 
 ```text
 /ctf nama: SQL Injection Lab platform: TryHackMe url: https://example.com kategori: web catatan: Fokus basic auth bypass

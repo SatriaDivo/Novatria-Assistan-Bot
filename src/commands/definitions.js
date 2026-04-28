@@ -186,7 +186,7 @@ const commands = [
 
   new SlashCommandBuilder()
     .setName("ctfnotify")
-    .setDescription("Atur notifikasi otomatis lomba CTFtime")
+    .setDescription("Atur notifikasi otomatis H-3 lomba CTFtime")
     .addStringOption((option) =>
       option
         .setName("status")
@@ -268,7 +268,10 @@ const commands = [
       option.setName("judul").setDescription("Judul tantangan (opsional)").setRequired(false)
     )
     .addStringOption((option) =>
-      option.setName("hadiah").setDescription("Hadiah tantangan, contoh: Rp500.000 (opsional)").setRequired(false)
+      option
+        .setName("hadiah")
+        .setDescription("Hadiah tantangan, contoh: Rp500.000 (opsional)")
+        .setRequired(false)
     ),
 ];
 
