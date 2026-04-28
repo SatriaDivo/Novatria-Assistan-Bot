@@ -9,6 +9,10 @@ const labels = {
   jadwal: "Jadwal",
   mabar: "Mabar",
   arsip: "Arsip",
+  ctf_challenge: "CTF Challenge",
+  ctf_writeup: "CTF Writeup",
+  ctf_progress: "CTF Progress",
+  ctf_tantangan: "CTF Tantangan",
 };
 
 function ambilRingkasan(type, item) {
@@ -22,6 +26,20 @@ function ambilRingkasan(type, item) {
   }
   if (type === "mabar") {
     return `${item.Game || "-"}\n${item.Tanggal || "Tanggal belum ditentukan"} ${item.Jam || "-"}`;
+  }
+  if (type === "ctf_challenge") {
+    return `${item.Nama || "-"}\n${item.Platform || "-"} / ${item.Kategori || "-"}\n${item.URL || "-"}`;
+  }
+  if (type === "ctf_writeup") {
+    return `${item.Judul || "-"}\nChallenge: ${item.Challenge || "-"}\n${item.URL || "-"}`;
+  }
+  if (type === "ctf_progress") {
+    return `${item.Challenge || "-"}\nStatus: ${item.Status || "-"}\n${item.Catatan || "-"}`;
+  }
+  if (type === "ctf_tantangan") {
+    const path = item.Path ? `/${item.Path}` : "";
+
+    return `${item.Judul || item.Repository || "-"}\n${item.Repository || "-"}${path}\n${item.URL || "-"}`;
   }
 
   return item.Isi || "-";
@@ -41,6 +59,14 @@ async function execute(interaction) {
     result = await listSheet(type, limit);
   } catch (error) {
     return replyError(interaction, "Gagal mengambil data", error.message);
+  }
+
+  if (result.skipped) {
+    return replyError(
+      interaction,
+      "Google Sheet belum aktif",
+      "SHEET_WEBAPP_URL belum dikonfigurasi, jadi data belum bisa dibaca."
+    );
   }
 
   const items = result.items || [];

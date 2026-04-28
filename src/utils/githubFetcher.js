@@ -87,7 +87,9 @@ async function fetchContents(owner, repo, path = "", branch = null) {
     }
 
     if (response.status === 403) {
-      throw new Error("GitHub API rate limit tercapai. Coba lagi nanti atau tambahkan GITHUB_TOKEN di .env.");
+      throw new Error(
+        "GitHub API rate limit tercapai. Coba lagi nanti atau tambahkan GITHUB_TOKEN di .env."
+      );
     }
 
     throw new Error(`GitHub API error ${response.status}: ${body}`);

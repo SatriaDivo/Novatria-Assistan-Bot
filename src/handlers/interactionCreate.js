@@ -5,6 +5,7 @@ const list = require("../commands/list");
 const hapus = require("../commands/hapus");
 const catat = require("../commands/catat");
 const todo = require("../commands/todo");
+const done = require("../commands/done");
 const link = require("../commands/link");
 const jadwal = require("../commands/jadwal");
 const mabar = require("../commands/mabar");
@@ -28,6 +29,7 @@ const commandHandlers = {
   hapus,
   catat,
   todo,
+  done,
   link,
   jadwal,
   mabar,

@@ -1,5 +1,18 @@
 const { SlashCommandBuilder } = require("discord.js");
 
+const dataTypeChoices = [
+  { name: "Catatan", value: "catat" },
+  { name: "Todo", value: "todo" },
+  { name: "Link", value: "link" },
+  { name: "Jadwal", value: "jadwal" },
+  { name: "Mabar", value: "mabar" },
+  { name: "Arsip", value: "arsip" },
+  { name: "CTF Challenge", value: "ctf_challenge" },
+  { name: "CTF Writeup", value: "ctf_writeup" },
+  { name: "CTF Progress", value: "ctf_progress" },
+  { name: "CTF Tantangan", value: "ctf_tantangan" },
+];
+
 // Definisi semua slash command yang akan didaftarkan ke Discord.
 const commands = [
   new SlashCommandBuilder().setName("ping").setDescription("Cek apakah bot aktif"),
@@ -20,14 +33,7 @@ const commands = [
         .setName("tipe")
         .setDescription("Jenis data yang ingin dilihat")
         .setRequired(true)
-        .addChoices(
-          { name: "Catatan", value: "catat" },
-          { name: "Todo", value: "todo" },
-          { name: "Link", value: "link" },
-          { name: "Jadwal", value: "jadwal" },
-          { name: "Mabar", value: "mabar" },
-          { name: "Arsip", value: "arsip" }
-        )
+        .addChoices(...dataTypeChoices)
     )
     .addIntegerOption((option) =>
       option
@@ -46,14 +52,7 @@ const commands = [
         .setName("tipe")
         .setDescription("Jenis data yang ingin dihapus")
         .setRequired(true)
-        .addChoices(
-          { name: "Catatan", value: "catat" },
-          { name: "Todo", value: "todo" },
-          { name: "Link", value: "link" },
-          { name: "Jadwal", value: "jadwal" },
-          { name: "Mabar", value: "mabar" },
-          { name: "Arsip", value: "arsip" }
-        )
+        .addChoices(...dataTypeChoices)
     )
     .addStringOption((option) =>
       option.setName("id").setDescription("ID data dari hasil /list").setRequired(true)
@@ -71,6 +70,13 @@ const commands = [
     .setDescription("Kirim tugas ke channel todo-list")
     .addStringOption((option) =>
       option.setName("tugas").setDescription("Tugas yang ingin ditambahkan").setRequired(true)
+    ),
+
+  new SlashCommandBuilder()
+    .setName("done")
+    .setDescription("Tandai todo sebagai selesai")
+    .addStringOption((option) =>
+      option.setName("id").setDescription("ID todo dari hasil /list").setRequired(true)
     ),
 
   new SlashCommandBuilder()

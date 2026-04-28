@@ -1,5 +1,5 @@
 const FALLBACK_SPREADSHEET_ID = "LINK-SHEET-ID-ANDA";
-const SCRIPT_VERSION = "2026-04-27-mabar-v1";
+const SCRIPT_VERSION = "2026-04-28-v1.1.0";
 
 const ID_PREFIXES = {
   catat: "CAT",
@@ -8,6 +8,14 @@ const ID_PREFIXES = {
   jadwal: "JAD",
   mabar: "MAB",
   arsip: "ARS",
+  ctf: "CTF",
+  ctf_challenge: "CTF",
+  writeup: "WUP",
+  ctf_writeup: "WUP",
+  progress: "PRG",
+  ctf_progress: "PRG",
+  tantangan: "TNG",
+  ctf_tantangan: "TNG",
   log: "LOG",
 };
 
@@ -125,6 +133,124 @@ const CONFIG = {
       data.isi,
     ],
   },
+  ctf_challenge: {
+    sheet: "CTF Challenge",
+    header: [
+      "ID",
+      "Waktu",
+      "User",
+      "User ID",
+      "Server",
+      "Channel",
+      "Nama",
+      "Platform",
+      "Kategori",
+      "URL",
+      "Catatan",
+    ],
+    row: (data) => [
+      data.id,
+      new Date(),
+      data.user,
+      data.userId,
+      data.server,
+      data.channel,
+      data.nama,
+      data.platform,
+      data.kategori,
+      data.url,
+      data.catatan,
+    ],
+  },
+  ctf_writeup: {
+    sheet: "CTF Writeup",
+    header: [
+      "ID",
+      "Waktu",
+      "User",
+      "User ID",
+      "Server",
+      "Channel",
+      "Judul",
+      "Challenge",
+      "Ringkasan",
+      "URL",
+    ],
+    row: (data) => [
+      data.id,
+      new Date(),
+      data.user,
+      data.userId,
+      data.server,
+      data.channel,
+      data.judul,
+      data.challenge,
+      data.ringkasan,
+      data.url,
+    ],
+  },
+  ctf_progress: {
+    sheet: "CTF Progress",
+    header: [
+      "ID",
+      "Waktu",
+      "User",
+      "User ID",
+      "Server",
+      "Channel",
+      "Challenge",
+      "Status",
+      "Catatan",
+    ],
+    row: (data) => [
+      data.id,
+      new Date(),
+      data.user,
+      data.userId,
+      data.server,
+      data.channel,
+      data.challenge,
+      data.status,
+      data.catatan,
+    ],
+  },
+  ctf_tantangan: {
+    sheet: "CTF Tantangan",
+    header: [
+      "ID",
+      "Waktu",
+      "User",
+      "User ID",
+      "Server",
+      "Channel",
+      "Judul",
+      "Repository",
+      "Path",
+      "Branch",
+      "URL",
+      "Hadiah",
+      "Markdown Files",
+      "Attachment Files",
+      "Skipped Summary",
+    ],
+    row: (data) => [
+      data.id,
+      new Date(),
+      data.user,
+      data.userId,
+      data.server,
+      data.channel,
+      data.judul,
+      data.repository,
+      data.path,
+      data.branch,
+      data.url,
+      data.hadiah,
+      data.markdownFiles,
+      data.attachmentFiles,
+      data.skippedSummary,
+    ],
+  },
   log: {
     sheet: "Log",
     header: ["ID", "Waktu", "Type", "User", "User ID", "Server", "Channel", "Data"],
@@ -204,6 +330,16 @@ function doPost(e) {
     if (action === "delete") {
       const deleted = deleteById(sheet, String(data.id || ""));
       return json({ ok: true, deleted });
+    }
+
+    if (action === "update_status") {
+      if (type !== "todo") {
+        return json({ ok: false, error: "Action update_status hanya mendukung type todo." });
+      }
+
+      const status = data.status || "Selesai";
+      const updated = updateStatusById(sheet, config.header, String(data.id || ""), status);
+      return json({ ok: true, updated, id: data.id || "", status });
     }
 
     return json({ ok: false, error: "Action tidak dikenal" });
@@ -367,6 +503,30 @@ function deleteById(sheet, id) {
   for (let index = ids.length - 1; index >= 0; index--) {
     if (String(ids[index][0]) === id) {
       sheet.deleteRow(index + 2);
+      return true;
+    }
+  }
+
+  return false;
+}
+
+function updateStatusById(sheet, header, id, status) {
+  if (!id || sheet.getLastRow() <= 1) {
+    return false;
+  }
+
+  const idColumn = 1;
+  const statusColumn = header.indexOf("Status") + 1;
+
+  if (statusColumn <= 0) {
+    throw new Error("Kolom Status tidak ditemukan.");
+  }
+
+  const ids = sheet.getRange(2, idColumn, sheet.getLastRow() - 1, 1).getValues();
+
+  for (let index = ids.length - 1; index >= 0; index--) {
+    if (String(ids[index][0]) === id) {
+      sheet.getRange(index + 2, statusColumn).setValue(status);
       return true;
     }
   }

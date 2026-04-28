@@ -5,6 +5,10 @@ const prefixes = {
   jadwal: "JAD",
   mabar: "MAB",
   arsip: "ARS",
+  ctf: "CTF",
+  writeup: "WUP",
+  progress: "PRG",
+  tantangan: "TNG",
 };
 
 function buatId(type) {

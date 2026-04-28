@@ -47,6 +47,12 @@ async function requestSheet(action, type, data = {}) {
     );
   }
 
+  if (action === "update_status" && typeof result.updated !== "boolean") {
+    throw new Error(
+      "Apps Script belum mendukung /done. Paste ulang google-apps-script.js ke Apps Script, lalu deploy versi Web App terbaru."
+    );
+  }
+
   return result;
 }
 
@@ -60,6 +66,10 @@ async function listSheet(type, limit = 10) {
 
 async function hapusSheet(type, id) {
   return requestSheet("delete", type, { id });
+}
+
+async function updateTodoStatus(id, status = "Selesai") {
+  return requestSheet("update_status", "todo", { id, status });
 }
 
 async function cekSheetStatus() {
@@ -77,4 +87,5 @@ async function cekSheetStatus() {
 module.exports = simpanKeSheet;
 module.exports.listSheet = listSheet;
 module.exports.hapusSheet = hapusSheet;
+module.exports.updateTodoStatus = updateTodoStatus;
 module.exports.cekSheetStatus = cekSheetStatus;

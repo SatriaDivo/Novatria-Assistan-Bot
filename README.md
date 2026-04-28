@@ -12,6 +12,14 @@
 
 Novatria Assistant Bot adalah Discord bot berbasis Node.js dan discord.js v14 untuk mencatat catatan, todo, link penting, jadwal, mabar, dan arsip ke channel Discord sekaligus menyimpan datanya ke Google Sheet melalui Google Apps Script Web App.
 
+## v1.1.0 Highlights
+
+- Stability: data runtime CTFtime dipersistenkan lewat Docker volume `./data:/app/data`.
+- Usability: command `/done` untuk menandai todo sebagai selesai dan `/status` kini lebih detail.
+- CTF tracking: sheet khusus untuk challenge, writeup, progress, dan tantangan CTF.
+- Safety: `/hapus` dibatasi untuk Administrator, Manage Server, atau role di `ADMIN_ROLE_IDS`.
+- Anti-spam: `/tantangan` membatasi proses GitHub folder besar ke 5 markdown, 5 attachment, dan 10 chunk markdown.
+
 ## Features
 
 ### 🤖 Umum
@@ -30,6 +38,7 @@ Novatria Assistant Bot adalah Discord bot berbasis Node.js dan discord.js v14 un
 | ------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
 | `/catat isi`              | Kirim catatan ke channel catatan → sheet `Catatan`                                                                      |
 | `/todo tugas`             | Kirim todo ke channel todo-list → sheet `Todo`                                                                          |
+| `/done id`                | Tandai todo sebagai selesai di Google Sheet                                                                             |
 | `/link url judul catatan` | Kirim link penting → sheet `Link`                                                                                       |
 | `/jadwal judul jam ...`   | Kirim jadwal → sheet `Jadwal`. Opsi `tanggal`, `bulan`, `tahun`, `selesai`, `catatan` bersifat opsional                 |
 | `/mabar game jam ...`     | Kirim jadwal mabar ke channel info-mabar → sheet `Mabar`. Opsi `tanggal`, `bulan`, `tahun`, `catatan` bersifat opsional |
@@ -37,15 +46,15 @@ Novatria Assistant Bot adalah Discord bot berbasis Node.js dan discord.js v14 un
 
 ### 🏴 CTF
 
-| Command                                   | Deskripsi                                                                                                           |
-| ----------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
-| `/ctfevent limit`                         | Lihat lomba CTF upcoming dari CTFtime public API                                                                    |
-| `/ctfcek`                                 | Kirim daftar lomba CTF upcoming ke channel ctf-info                                                                 |
-| `/ctfnotify status`                       | Aktifkan/matikan notifikasi otomatis H-3 CTFtime                                                                    |
-| `/ctf nama platform url kategori catatan` | Tambah challenge CTF ke channel ctf-target                                                                          |
-| `/tantangan url judul hadiah`             | Tambah tantangan dari GitHub — auto-baca file `.md` & download file ke ctf-info. Opsi `judul` dan `hadiah` opsional |
-| `/writeup judul challenge ringkasan url`  | Simpan writeup CTF ke channel ctf-writeup                                                                           |
-| `/progress challenge status catatan`      | Update progress challenge CTF ke channel ctf-progress                                                               |
+| Command                                   | Deskripsi                                                                                               |
+| ----------------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| `/ctfevent limit`                         | Lihat lomba CTF upcoming dari CTFtime public API                                                        |
+| `/ctfcek`                                 | Kirim daftar lomba CTF upcoming ke channel ctf-info                                                     |
+| `/ctfnotify status`                       | Aktifkan/matikan notifikasi otomatis H-3 CTFtime                                                        |
+| `/ctf nama platform url kategori catatan` | Tambah challenge CTF ke channel ctf-target                                                              |
+| `/tantangan url judul hadiah`             | Tambah tantangan dari GitHub → sheet `CTF Tantangan`, auto-baca `.md` & download file dengan batas aman |
+| `/writeup judul challenge ringkasan url`  | Simpan writeup CTF ke channel ctf-writeup                                                               |
+| `/progress challenge status catatan`      | Update progress challenge CTF ke channel ctf-progress                                                   |
 
 ### ⚙️ Integrasi & Sistem
 
@@ -77,6 +86,7 @@ Novatria-Bot
    │  ├─ hapus.js
    │  ├─ catat.js
    │  ├─ todo.js
+   │  ├─ done.js
    │  ├─ link.js
    │  ├─ jadwal.js
    │  ├─ mabar.js
@@ -101,6 +111,7 @@ Novatria-Bot
       ├─ getTargetChannel.js
       ├─ kirimKeChannel.js
       ├─ logActivity.js
+      ├─ permissionGuard.js
       ├─ buatId.js
       └─ sheet.js
 ```
@@ -135,6 +146,9 @@ CHANNEL_MABAR_ID=
 CHANNEL_ARSIP_ID=
 CHANNEL_LOG_ID=
 
+# Opsional: role yang boleh memakai command sensitif (/hapus)
+ADMIN_ROLE_IDS=
+
 # Opsional: GitHub Personal Access Token untuk /tantangan (menghindari rate limit)
 GITHUB_TOKEN=
 ```
@@ -147,6 +161,7 @@ Catatan:
 - `SHEET_SECRET` harus sama dengan Script Property `SECRET_KEY` di Google Apps Script.
 - Channel ID bersifat opsional. Jika kosong, bot akan mencari channel berdasarkan nama, misalnya `catatan`, `todo-list`, `link-penting`, `jadwal`, `mabar`, dan `arsip`.
 - Untuk `/mabar`, bot memprioritaskan channel yang namanya mengandung `info-mabar`. Jika tidak ada, bot memakai `CHANNEL_MABAR_ID`, lalu fallback ke `jadwal-mabar`, `mabar-chat`, atau `jadwal`.
+- `ADMIN_ROLE_IDS` opsional. Isi dengan satu atau beberapa role ID dipisahkan koma, misalnya `111,222`. Role ini boleh memakai `/hapus` selain user Administrator atau Manage Server.
 
 ## Menjalankan Bot
 
@@ -183,6 +198,8 @@ Di channel/category CTF, bot juga menolak command non-CTF seperti `/catat`, `/to
 
 Data lomba diambil dari CTFtime public API, bukan scraping web dan tidak membutuhkan cookie/login CTFtime.
 
+Semua command CTF di area `ctf-command` bisa dipakai oleh member biasa selama mereka punya akses channel dan izin memakai slash command.
+
 ### CTF Zone
 
 `🧩 CTF ZONE — NOVATRIA HQ`
@@ -214,7 +231,7 @@ Discord tidak mengizinkan bot token biasa mengubah visibilitas command per chann
 2. Pilih **Integrations**.
 3. Pilih aplikasi **Novatria Assistant** lalu klik **Manage**.
 4. Untuk channel/category CTF, nonaktifkan command non-CTF:
-   `/ping`, `/help`, `/status`, `/list`, `/hapus`, `/catat`, `/todo`, `/link`, `/jadwal`, `/mabar`, `/arsip`.
+   `/ping`, `/help`, `/status`, `/list`, `/hapus`, `/catat`, `/todo`, `/done`, `/link`, `/jadwal`, `/mabar`, `/arsip`.
 5. Biarkan command CTF aktif:
    `/ctfevent`, `/ctfcek`, `/ctfnotify`, `/ctf`, `/tantangan`, `/writeup`, `/progress`.
 
@@ -269,6 +286,8 @@ Mengirim update progress ke channel `🏆-ctf-progress` dan menyimpannya sebagai
 
 Menambahkan tantangan dari GitHub ke channel `🧩-ctf-info`. Bot otomatis membaca file `.md` dan menampilkannya sebagai embed, serta mengirim file lainnya sebagai attachment. Opsi `judul` dan `hadiah` bersifat opsional.
 
+Untuk mencegah spam pada folder GitHub besar, `/tantangan` memproses maksimal 5 file markdown, 5 attachment, dan 10 chunk markdown. File yang dilewati akan dirangkum di channel.
+
 ## Menjalankan Dengan Docker di Windows
 
 Pastikan Docker Desktop sudah terinstall dan berjalan. File `.env` tetap dipakai dari folder project dan tidak dimasukkan ke image Docker.
@@ -298,6 +317,8 @@ docker compose down
 ```
 
 Container memakai `restart: unless-stopped`, jadi Docker akan menjalankan ulang bot otomatis setelah Docker Desktop aktif kembali.
+
+`docker-compose.yml` memount folder `./data` di host ke `/app/data` di container. File runtime seperti `ctftime-settings.json` dan `ctftime-seen.json` tetap aman saat container rebuild.
 
 ### Auto Run Saat Laptop Menyala
 
@@ -336,6 +357,12 @@ Pastikan bot punya permission berikut pada channel target:
 
 Gunakan `/status` untuk mengecek apakah channel dan permission sudah benar.
 
+## Command Sensitif
+
+Command berikut hanya bisa digunakan oleh Administrator, user dengan permission Manage Server, atau role yang terdaftar di `ADMIN_ROLE_IDS`:
+
+- `/hapus`
+
 ## Google Apps Script
 
 Bot mengirim data ke Google Sheet melalui POST request ke `SHEET_WEBAPP_URL`.
@@ -363,9 +390,17 @@ Pastikan Apps Script:
 - Memiliki fungsi `doPost(e)`.
 - Memvalidasi `secret` dari Script Property `SECRET_KEY`.
 - Menyimpan, membaca, dan menghapus data berdasarkan `type`.
+- Mendukung action `update_status` untuk command `/done`.
 - Dideploy sebagai Web App.
 
-Kode lengkap Apps Script tersedia di `google-apps-script.js`. Apps Script mendukung sheet `Catatan`, `Todo`, `Link`, `Jadwal`, `Mabar`, `Arsip`, dan `Log`. Jika memakai fitur `/status`, `/list`, `/hapus`, dan `/mabar`, paste ulang isi file itu ke Google Apps Script lalu deploy versi Web App terbaru.
+Kode lengkap Apps Script tersedia di `google-apps-script.js`. Apps Script mendukung sheet `Catatan`, `Todo`, `Link`, `Jadwal`, `Mabar`, `Arsip`, `CTF Challenge`, `CTF Writeup`, `CTF Progress`, `CTF Tantangan`, dan `Log`. Jika memakai fitur `/status`, `/list`, `/hapus`, `/done`, `/mabar`, dan command CTF, paste ulang isi file itu ke Google Apps Script lalu deploy versi Web App terbaru.
+
+Sheet CTF baru:
+
+- `CTF Challenge` untuk `/ctf`.
+- `CTF Writeup` untuk `/writeup`.
+- `CTF Progress` untuk `/progress`.
+- `CTF Tantangan` untuk `/tantangan`.
 
 ### Setup Script Properties
 
@@ -385,9 +420,12 @@ Nilai `SECRET_KEY` harus sama dengan `SHEET_SECRET` di `.env`. Setelah mengubah 
 /help
 /status
 /list tipe: Todo limit: 10
+/list tipe: CTF Challenge limit: 5
 /hapus tipe: Todo id: TODO-MABC1234-ABCD
+/hapus tipe: CTF Challenge id: CTF-MABC1234-ABCD
 /catat isi: test catatan
 /todo tugas: belajar discord bot
+/done id: TODO-MABC1234-ABCD
 /link url: https://example.com judul: Contoh catatan: testing link
 /jadwal judul: Meeting jam: 20:00 selesai: 21:00 catatan: bahas bot hari ini
 /jadwal judul: Meeting jam: 20:00 tanggal: 25 bulan: 4 tahun: 2026 selesai: 21:00 catatan: bahas bot

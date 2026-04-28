@@ -108,8 +108,6 @@ async function execute(interaction) {
     .setTimestamp();
 
   try {
-    await channelJadwal.send({ embeds: [embed] });
-
     const result = await simpanKeSheet("jadwal", {
       id,
       user: interaction.user.tag,
@@ -122,6 +120,16 @@ async function execute(interaction) {
       selesai,
       catatan,
     });
+
+    if (result.skipped) {
+      return replyError(
+        interaction,
+        "Google Sheet belum aktif",
+        "SHEET_WEBAPP_URL belum dikonfigurasi. Jadwal belum dikirim ke Discord agar tidak ada jadwal tanpa data Sheet/Calendar."
+      );
+    }
+
+    await channelJadwal.send({ embeds: [embed] });
 
     return replySuccess(
       interaction,

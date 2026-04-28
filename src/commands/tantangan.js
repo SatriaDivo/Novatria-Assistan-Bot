@@ -2,6 +2,8 @@ const { EmbedBuilder, AttachmentBuilder } = require("discord.js");
 const { assertCtfCommandChannel } = require("../utils/ctfChannelGuard");
 const { findCtfContentChannel } = require("../utils/ctfChannels");
 const { replyError, replySuccess } = require("../utils/replyEmbed");
+const simpanKeSheet = require("../utils/sheet");
+const buatId = require("../utils/buatId");
 const {
   parseGithubUrl,
   fetchContents,
@@ -13,8 +15,9 @@ const {
 
 // Batas karakter embed description Discord
 const EMBED_DESC_LIMIT = 4096;
-// Batas karakter total embed
-const EMBED_TOTAL_LIMIT = 6000;
+const MAX_MARKDOWN_FILES = 5;
+const MAX_ATTACHMENT_FILES = 5;
+const MAX_MARKDOWN_CHUNKS = 10;
 
 /**
  * Potong teks markdown agar muat di embed Discord.
@@ -68,6 +71,7 @@ async function execute(interaction) {
     return;
   }
 
+  const id = buatId("tantangan");
   const url = interaction.options.getString("url", true).trim();
   const judul = interaction.options.getString("judul");
   const hadiah = interaction.options.getString("hadiah");
@@ -96,6 +100,14 @@ async function execute(interaction) {
   const mdFiles = contents.filter((f) => f.type === "file" && isMarkdownFile(f.name));
   const otherFiles = contents.filter((f) => f.type === "file" && !isMarkdownFile(f.name));
   const directories = contents.filter((f) => f.type === "dir");
+  const mdFilesToProcess = mdFiles.slice(0, MAX_MARKDOWN_FILES);
+  const otherFilesToProcess = otherFiles.slice(0, MAX_ATTACHMENT_FILES);
+  const skippedSummary = [];
+  let sentMarkdownChunks = 0;
+  let skippedMarkdownChunks = 0;
+  let skippedMarkdownFilesByChunkLimit = 0;
+  let processedMarkdownFiles = 0;
+  let processedAttachmentFiles = 0;
 
   if (mdFiles.length === 0 && otherFiles.length === 0) {
     return replyError(
@@ -136,10 +148,12 @@ async function execute(interaction) {
     .setDescription(
       [
         `**Repository:** [${owner}/${repo}](${url})`,
+        `**ID:** \`${id}\``,
         path ? `**Path:** \`${path}\`` : null,
         branch ? `**Branch:** \`${branch}\`` : null,
         hadiah ? `**🏆 Hadiah:** ${hadiah}` : null,
         `**File ditemukan:** ${mdFiles.length} markdown, ${otherFiles.length} file lainnya${directories.length > 0 ? `, ${directories.length} folder` : ""}`,
+        `**Limit proses:** ${MAX_MARKDOWN_FILES} markdown, ${MAX_ATTACHMENT_FILES} attachment, ${MAX_MARKDOWN_CHUNKS} chunk markdown.`,
       ]
         .filter(Boolean)
         .join("\n")
@@ -152,20 +166,35 @@ async function execute(interaction) {
   // Kirim header embed ke ctf-info
   await channel.send({ embeds: [headerEmbed] });
 
-  // Proses setiap file markdown → kirim sebagai embed
-  for (const mdFile of mdFiles) {
+  // Proses file markdown dengan batas aman agar folder besar tidak spam channel.
+  for (const mdFile of mdFilesToProcess) {
     try {
       const rawContent = await fetchRawContent(owner, repo, mdFile.path, branch);
       const chunks = splitMarkdown(rawContent);
+      const remainingChunks = MAX_MARKDOWN_CHUNKS - sentMarkdownChunks;
 
-      for (let i = 0; i < chunks.length; i++) {
+      if (remainingChunks <= 0) {
+        skippedMarkdownFilesByChunkLimit += 1;
+        continue;
+      }
+
+      const chunksToSend = chunks.slice(0, remainingChunks);
+      skippedMarkdownChunks += chunks.length - chunksToSend.length;
+      processedMarkdownFiles += 1;
+
+      for (let i = 0; i < chunksToSend.length; i++) {
         const mdEmbed = new EmbedBuilder()
           .setColor(0x58a6ff)
-          .setTitle(chunks.length > 1 ? `📄 ${mdFile.name} (${i + 1}/${chunks.length})` : `📄 ${mdFile.name}`)
-          .setDescription(chunks[i])
+          .setTitle(
+            chunks.length > 1
+              ? `📄 ${mdFile.name} (${i + 1}/${chunks.length})`
+              : `📄 ${mdFile.name}`
+          )
+          .setDescription(chunksToSend[i])
           .setTimestamp();
 
         await channel.send({ embeds: [mdEmbed] });
+        sentMarkdownChunks += 1;
       }
     } catch (error) {
       const errorEmbed = new EmbedBuilder()
@@ -179,7 +208,7 @@ async function execute(interaction) {
   }
 
   // Proses file non-markdown → kirim sebagai attachment atau link
-  for (const file of otherFiles) {
+  for (const file of otherFilesToProcess) {
     try {
       if (file.size && file.size > MAX_DISCORD_FILE_SIZE) {
         // File terlalu besar, kirim link saja
@@ -192,6 +221,7 @@ async function execute(interaction) {
           .setTimestamp();
 
         await channel.send({ embeds: [linkEmbed] });
+        processedAttachmentFiles += 1;
         continue;
       }
 
@@ -203,10 +233,13 @@ async function execute(interaction) {
         const linkEmbed = new EmbedBuilder()
           .setColor(0xe3b341)
           .setTitle(`📎 ${file.name}`)
-          .setDescription(`File terlalu besar untuk Discord.\n**Download:** [Klik di sini](${file.download_url || file.html_url})`)
+          .setDescription(
+            `File terlalu besar untuk Discord.\n**Download:** [Klik di sini](${file.download_url || file.html_url})`
+          )
           .setTimestamp();
 
         await channel.send({ embeds: [linkEmbed] });
+        processedAttachmentFiles += 1;
         continue;
       }
 
@@ -216,6 +249,7 @@ async function execute(interaction) {
         content: `📎 **${file.name}** (${formatSize(buffer.length)})`,
         files: [attachment],
       });
+      processedAttachmentFiles += 1;
     } catch (error) {
       const errorEmbed = new EmbedBuilder()
         .setColor(0xf85149)
@@ -233,10 +267,78 @@ async function execute(interaction) {
     const dirEmbed = new EmbedBuilder()
       .setColor(0x8b949e)
       .setTitle("📁 Sub-folder ditemukan")
-      .setDescription(`Folder berikut tidak di-download otomatis. Gunakan \`/tantangan\` dengan path spesifik untuk membukanya.\n\n${dirList}`)
+      .setDescription(
+        `Folder berikut tidak di-download otomatis. Gunakan \`/tantangan\` dengan path spesifik untuk membukanya.\n\n${dirList}`
+      )
       .setTimestamp();
 
     await channel.send({ embeds: [dirEmbed] });
+  }
+
+  const skippedMarkdownFilesByFileLimit = mdFiles.length - mdFilesToProcess.length;
+  const skippedAttachmentFilesByFileLimit = otherFiles.length - otherFilesToProcess.length;
+
+  if (skippedMarkdownFilesByFileLimit > 0) {
+    skippedSummary.push(
+      `${skippedMarkdownFilesByFileLimit} markdown file dilewati karena limit ${MAX_MARKDOWN_FILES} file.`
+    );
+  }
+
+  if (skippedAttachmentFilesByFileLimit > 0) {
+    skippedSummary.push(
+      `${skippedAttachmentFilesByFileLimit} attachment file dilewati karena limit ${MAX_ATTACHMENT_FILES} file.`
+    );
+  }
+
+  if (skippedMarkdownFilesByChunkLimit > 0) {
+    skippedSummary.push(
+      `${skippedMarkdownFilesByChunkLimit} markdown file dilewati karena limit chunk sudah habis.`
+    );
+  }
+
+  if (skippedMarkdownChunks > 0) {
+    skippedSummary.push(
+      `${skippedMarkdownChunks} chunk markdown dilewati karena limit total ${MAX_MARKDOWN_CHUNKS} chunk.`
+    );
+  }
+
+  let sheetStatus = "Disimpan";
+
+  try {
+    const sheetResult = await simpanKeSheet("ctf_tantangan", {
+      id,
+      user: interaction.user.tag,
+      userId: interaction.user.id,
+      server: interaction.guild.name,
+      channel: targetChannel.name,
+      judul: headerTitle,
+      repository: `${owner}/${repo}`,
+      path: path || "",
+      branch: branch || "",
+      url,
+      hadiah: hadiah || "",
+      markdownFiles: `${processedMarkdownFiles}/${mdFiles.length}`,
+      attachmentFiles: `${processedAttachmentFiles}/${otherFiles.length}`,
+      skippedSummary: skippedSummary.join("; ") || "-",
+    });
+
+    if (sheetResult.skipped) {
+      sheetStatus = "Dilewati karena SHEET_WEBAPP_URL belum dikonfigurasi.";
+    } else if (sheetResult.sheet && sheetResult.sheet !== "CTF Tantangan") {
+      sheetStatus = `Tersimpan ke ${sheetResult.sheet}. Update Apps Script agar memakai sheet CTF Tantangan.`;
+    }
+  } catch (error) {
+    sheetStatus = `Gagal menyimpan: ${error.message}`;
+  }
+
+  if (skippedSummary.length > 0) {
+    const summaryEmbed = new EmbedBuilder()
+      .setColor(0xe3b341)
+      .setTitle("⚠️ Sebagian file dilewati")
+      .setDescription(skippedSummary.join("\n"))
+      .setTimestamp();
+
+    await channel.send({ embeds: [summaryEmbed] });
   }
 
   await replySuccess(
@@ -244,9 +346,15 @@ async function execute(interaction) {
     "Tantangan berhasil ditambahkan",
     `Tantangan dari [${owner}/${repo}](${url}) berhasil dikirim ke ${targetChannel}.`,
     [
+      { name: "ID", value: `\`${id}\``, inline: true },
       { name: "Channel", value: `${targetChannel}`, inline: true },
-      { name: "Markdown", value: `${mdFiles.length} file`, inline: true },
-      { name: "Attachment", value: `${otherFiles.length} file`, inline: true },
+      { name: "Markdown", value: `${processedMarkdownFiles}/${mdFiles.length} file`, inline: true },
+      {
+        name: "Attachment",
+        value: `${processedAttachmentFiles}/${otherFiles.length} file`,
+        inline: true,
+      },
+      { name: "Google Sheet", value: sheetStatus },
     ]
   );
 }

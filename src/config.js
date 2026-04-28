@@ -7,6 +7,10 @@ module.exports = {
   sheetWebAppUrl: process.env.SHEET_WEBAPP_URL,
   sheetSecret: process.env.SHEET_SECRET,
   githubToken: process.env.GITHUB_TOKEN || "",
+  adminRoleIds: (process.env.ADMIN_ROLE_IDS || "")
+    .split(",")
+    .map((roleId) => roleId.trim())
+    .filter(Boolean),
   channels: {
     catatan: process.env.CHANNEL_CATATAN_ID,
     todo: process.env.CHANNEL_TODO_ID,
