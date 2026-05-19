@@ -19,6 +19,7 @@ Novatria Assistant Bot adalah Discord bot berbasis Node.js dan discord.js v14 un
 - CTF tracking: sheet khusus untuk challenge, writeup, progress, dan tantangan CTF.
 - Safety: `/hapus` dibatasi untuk Administrator, Manage Server, atau role di `ADMIN_ROLE_IDS`.
 - Anti-spam: `/tantangan` membatasi proses GitHub folder besar ke 5 markdown, 5 attachment, dan 10 chunk markdown.
+- Voice Interrupter: Bot bisa otomatis masuk ke Voice Channel dan memotong pembicaraan user/role target.
 
 ## Features
 
@@ -55,6 +56,16 @@ Novatria Assistant Bot adalah Discord bot berbasis Node.js dan discord.js v14 un
 | `/tantangan url judul hadiah`             | Tambah tantangan dari GitHub → sheet `CTF Tantangan`, auto-baca `.md` & download file dengan batas aman |
 | `/writeup judul challenge ringkasan url`  | Simpan writeup CTF ke channel ctf-writeup                                                               |
 | `/progress challenge status catatan`      | Update progress challenge CTF ke channel ctf-progress                                                   |
+
+### 🎙️ Voice Interrupter
+
+| Command                                   | Deskripsi                                                                                               |
+| ----------------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| `/interrupter toggle status`              | Menghidupkan (ON) atau mematikan (OFF) fitur interrupter.                                               |
+| `/interrupter target user role`           | Mengatur target spesifik yang akan dipotong pembicaraannya (bisa User atau Role tertentu).              |
+| `/interrupter sound nama`                 | Memilih file MP3 yang akan dimainkan saat target berbicara (tersimpan di `assets/sounds/`).             |
+| `/interrupter status`                     | Mengecek status interrupter saat ini (Aktif/Mati, Target, dan Suara yang dipilih).                      |
+
 
 ### ⚙️ Integrasi & Sistem
 
