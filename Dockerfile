@@ -10,6 +10,7 @@ COPY index.js ./
 COPY data ./data
 COPY scripts ./scripts
 COPY src ./src
+COPY assets ./assets
 RUN mkdir -p data && chown -R node:node /app/data
 
 USER node
