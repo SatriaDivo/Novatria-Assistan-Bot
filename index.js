@@ -3,9 +3,10 @@ const config = require("./src/config");
 const commands = require("./src/commands/definitions");
 const interactionCreate = require("./src/handlers/interactionCreate");
 const { startCtftimeNotifier } = require("./src/utils/ctftimeNotifier");
+const { handleVoiceStateUpdate } = require("./src/utils/interrupterService");
 
 const client = new Client({
-  intents: [GatewayIntentBits.Guilds],
+  intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildVoiceStates],
 });
 
 // Hapus semua slash command global lama milik aplikasi agar tidak dobel dengan command guild.
@@ -47,5 +48,10 @@ client.once("clientReady", async (readyClient) => {
 
 // Semua slash command diproses di handler terpisah.
 client.on("interactionCreate", interactionCreate);
+
+// Handler untuk Voice State (Voice Interrupter)
+client.on("voiceStateUpdate", (oldState, newState) => {
+  handleVoiceStateUpdate(oldState, newState);
+});
 
 client.login(config.token);

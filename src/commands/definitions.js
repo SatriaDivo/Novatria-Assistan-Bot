@@ -279,6 +279,38 @@ const commands = [
         .setDescription("Hadiah tantangan, contoh: Rp500.000 (opsional)")
         .setRequired(false)
     ),
+  new SlashCommandBuilder()
+    .setName("interrupter")
+    .setDescription("Atur fitur bot pemotong pembicaraan (Voice Interrupter)")
+    .addSubcommand(subcommand =>
+      subcommand
+        .setName("toggle")
+        .setDescription("Aktifkan atau matikan fitur interrupter")
+        .addStringOption(option =>
+          option.setName("status")
+            .setDescription("Status")
+            .setRequired(true)
+            .addChoices({ name: "ON", value: "on" }, { name: "OFF", value: "off" })
+        )
+    )
+    .addSubcommand(subcommand =>
+      subcommand
+        .setName("target")
+        .setDescription("Atur target yang akan diinterupsi")
+        .addRoleOption(option => option.setName("role").setDescription("Role target (opsional)").setRequired(false))
+        .addUserOption(option => option.setName("user").setDescription("User target (opsional)").setRequired(false))
+    )
+    .addSubcommand(subcommand =>
+      subcommand
+        .setName("sound")
+        .setDescription("Pilih suara yang akan dimainkan")
+        .addStringOption(option => option.setName("nama").setDescription("Nama file suara tanpa ekstensi, contoh: donnie").setRequired(true))
+    )
+    .addSubcommand(subcommand =>
+      subcommand
+        .setName("status")
+        .setDescription("Lihat status interrupter saat ini")
+    ),
 ];
 
 module.exports = commands.map((command) => command.toJSON());

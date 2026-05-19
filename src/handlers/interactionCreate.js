@@ -17,6 +17,7 @@ const ctf = require("../commands/ctf");
 const writeup = require("../commands/writeup");
 const progress = require("../commands/progress");
 const tantangan = require("../commands/tantangan");
+const interrupter = require("../commands/interrupter");
 const logActivity = require("../utils/logActivity");
 const { isCtfArea, isCtfCommandName } = require("../utils/ctfChannelGuard");
 const { createEmbed } = require("../utils/replyEmbed");
@@ -41,6 +42,7 @@ const commandHandlers = {
   writeup,
   progress,
   tantangan,
+  interrupter,
 };
 
 async function interactionCreate(interaction) {
