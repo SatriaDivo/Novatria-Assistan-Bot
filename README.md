@@ -2,456 +2,109 @@
   <img src="assets/logo.png" alt="Novatria Assistant Bot Logo" width="180">
 </p>
 
-# Novatria Assistant Bot
+# Novatria Assistant Bot (Overhauled v2.0)
 
 [![Node.js](https://img.shields.io/badge/Node.js-20.x-339933?logo=node.js&logoColor=white)](https://nodejs.org/)
 [![discord.js](https://img.shields.io/badge/discord.js-v14-5865F2?logo=discord&logoColor=white)](https://discord.js.org/)
+[![SQLite](https://img.shields.io/badge/SQLite-better--sqlite3-003B57?logo=sqlite&logoColor=white)](https://github.com/WiseLibs/better-sqlite3)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![CI](https://github.com/SatriaDivo/Novatria-Assistan-Bot/actions/workflows/ci.yml/badge.svg)](https://github.com/SatriaDivo/Novatria-Assistan-Bot/actions/workflows/ci.yml)
-[![Project Status](https://img.shields.io/badge/status-active-brightgreen.svg)](#)
 
-Novatria Assistant Bot adalah Discord bot berbasis Node.js dan discord.js v14 untuk mencatat catatan, todo, link penting, jadwal, mabar, dan arsip ke channel Discord sekaligus menyimpan datanya ke Google Sheet melalui Google Apps Script Web App.
+Novatria Assistant Bot adalah bot Discord modern, ultra-ringan, dan cepat yang dirancang untuk:
+1. **Remote Control Hermes di VPS** langsung dari Discord (`/hermes status`, `/hermes cmd`, `/hermes restart`).
+2. **Sistem Bansos Akun & API Key Otomatis** dengan database SQLite atomik (anti-rebutan/anti-race condition) dan pengiriman credential secara *Ephemeral* (rahasia).
+3. **Komunitas & Gaming** (Auto-role, Welcome greeting, dan Self-Role interaktif via tombol).
 
-## v1.1.0 Highlights
+---
 
-- Stability: data runtime CTFtime dipersistenkan lewat Docker volume `./data:/app/data`.
-- Usability: command `/done` untuk menandai todo sebagai selesai dan `/status` kini lebih detail.
-- CTF tracking: sheet khusus untuk challenge, writeup, progress, dan tantangan CTF.
-- Safety: `/hapus` dibatasi untuk Administrator, Manage Server, atau role di `ADMIN_ROLE_IDS`.
-- Anti-spam: `/tantangan` membatasi proses GitHub folder besar ke 5 markdown, 5 attachment, dan 10 chunk markdown.
-- Voice Interrupter: Bot bisa otomatis masuk ke Voice Channel dan memotong pembicaraan user/role target.
+## ⚡ Fitur Utama
 
-## Features
+### 👑 1. Hermes VPS Controller (Khusus Admin)
+* `/hermes status` — Cek status daemon Hermes, uptime VPS, dan pemakaian RAM.
+* `/hermes cmd <command>` — Jalankan perintah CLI di VPS dengan batas waktu aman (10 detik) dan output terpotong otomatis.
+* `/hermes restart` — Kirim perintah restart daemon Hermes ke `systemd`.
 
-### 🤖 Umum
+### 🎁 2. Sistem Bansos Akun & API Key
+* `/bansos add <tipe> <label> <konten>` — Tambahkan stok akun atau API key ke database (Admin).
+* `/bansos stock` — Cek sisa kuota stok yang tersedia vs yang sudah diklaim.
+* `/bansos drop <tipe> [channel]` — Kirim panel embed interaktif ke channel bansos:
+  * Tombol `[🎁 Klaim Akun Gratis]`
+  * Tombol `[🔑 Klaim API Key]`
+* **Fitur Keamanan Bansos:**
+  * Transaksi atomik SQLite (`better-sqlite3` WAL mode): Aman saat ratusan user menekan tombol bersamaan.
+  * Credential dikirimkan secara **Ephemeral** (hanya terlihat oleh orang yang menekan tombol).
+  * Pembatasan 1 klaim per user per kategori.
+  * Notifikasi log otomatis ke channel `#bansos-manage`.
 
-| Command            | Deskripsi                                                        |
-| ------------------ | ---------------------------------------------------------------- |
-| `/ping`            | Cek apakah bot aktif                                             |
-| `/help`            | Lihat daftar semua command                                       |
-| `/status`          | Cek channel target, permission bot, dan konfigurasi Google Sheet |
-| `/list tipe limit` | Lihat data terbaru beserta ID (untuk keperluan hapus)            |
-| `/hapus tipe id`   | Hapus data dari Google Sheet berdasarkan ID                      |
+### 🌟 3. Komunitas & Self-Role
+* **Welcome Message & Auto-Role**: Menyambut member baru di `#welcome` dan otomatis memberikan role default `Member`.
+* `/rolepanel [channel]` — Mengirim panel tombol untuk mengambil role sendiri:
+  * `[🎁 Bansos Hunter]` (Notifikasi drop bansos)
+  * `[🎮 Gamers / Mabar]` (Ajakan main bareng)
 
-### 📝 Produktivitas & Catatan
+---
 
-| Command                   | Deskripsi                                                                                                               |
-| ------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
-| `/catat isi`              | Kirim catatan ke channel catatan → sheet `Catatan`                                                                      |
-| `/todo tugas`             | Kirim todo ke channel todo-list → sheet `Todo`                                                                          |
-| `/done id`                | Tandai todo sebagai selesai di Google Sheet                                                                             |
-| `/link url judul catatan` | Kirim link penting → sheet `Link`                                                                                       |
-| `/jadwal judul jam ...`   | Kirim jadwal → sheet `Jadwal`. Opsi `tanggal`, `bulan`, `tahun`, `selesai`, `catatan` bersifat opsional                 |
-| `/mabar game jam ...`     | Kirim jadwal mabar ke channel info-mabar → sheet `Mabar`. Opsi `tanggal`, `bulan`, `tahun`, `catatan` bersifat opsional |
-| `/arsip isi`              | Kirim arsip → sheet `Arsip`                                                                                             |
-
-### 🏴 CTF
-
-| Command                                   | Deskripsi                                                                                               |
-| ----------------------------------------- | ------------------------------------------------------------------------------------------------------- |
-| `/ctfevent limit`                         | Lihat lomba CTF upcoming dari CTFtime public API                                                        |
-| `/ctfcek`                                 | Kirim daftar lomba CTF upcoming ke channel ctf-info                                                     |
-| `/ctfnotify status`                       | Aktifkan/matikan notifikasi otomatis H-3 CTFtime                                                        |
-| `/ctf nama platform url kategori catatan` | Tambah challenge CTF ke channel ctf-target                                                              |
-| `/tantangan url judul hadiah`             | Tambah tantangan dari GitHub → sheet `CTF Tantangan`, auto-baca `.md` & download file dengan batas aman |
-| `/writeup judul challenge ringkasan url`  | Simpan writeup CTF ke channel ctf-writeup                                                               |
-| `/progress challenge status catatan`      | Update progress challenge CTF ke channel ctf-progress                                                   |
-
-### 🎙️ Voice Interrupter
-
-| Command                                   | Deskripsi                                                                                               |
-| ----------------------------------------- | ------------------------------------------------------------------------------------------------------- |
-| `/interrupter toggle status`              | Menghidupkan (ON) atau mematikan (OFF) fitur interrupter.                                               |
-| `/interrupter target user role`           | Mengatur target spesifik yang akan dipotong pembicaraannya (bisa User atau Role tertentu).              |
-| `/interrupter sound nama`                 | Memilih file MP3 yang akan dimainkan saat target berbicara (tersimpan di `assets/sounds/`).             |
-| `/interrupter status`                     | Mengecek status interrupter saat ini (Aktif/Mati, Target, dan Suara yang dipilih).                      |
-
-
-### ⚙️ Integrasi & Sistem
-
-- **Google Sheet** — semua data command tersimpan otomatis via Google Apps Script Web App.
-- **Google Calendar** — event jadwal otomatis dibuat di Google Calendar.
-- **Auto-log** — setiap aktivitas command dicatat ke channel `log-aktivitas` atau `CHANNEL_LOG_ID`.
-- **Embed message** — tampilan command rapi menggunakan Discord embed.
-- **CTF Channel Guard** — di area CTF, hanya command CTF yang diizinkan; command umum ditolak otomatis.
-
-## Struktur Folder
+## 📁 Susunan Channel Server Discord yang Disarankan
 
 ```text
-Novatria-Bot
-├─ .env.example
-├─ .gitignore
-├─ google-apps-script.js
-├─ package.json
-├─ index.js
-├─ data
-│  └─ .gitkeep
-└─ src
-   ├─ config.js
-   ├─ commands
-   │  ├─ definitions.js
-   │  ├─ ping.js
-   │  ├─ help.js
-   │  ├─ status.js
-   │  ├─ list.js
-   │  ├─ hapus.js
-   │  ├─ catat.js
-   │  ├─ todo.js
-   │  ├─ done.js
-   │  ├─ link.js
-   │  ├─ jadwal.js
-   │  ├─ mabar.js
-   │  ├─ arsip.js
-   │  ├─ ctfevent.js
-   │  ├─ ctfcek.js
-   │  ├─ ctfnotify.js
-   │  ├─ ctf.js
-   │  ├─ tantangan.js
-   │  ├─ writeup.js
-   │  └─ progress.js
-   ├─ handlers
-   │  └─ interactionCreate.js
-   └─ utils
-      ├─ ctfChannelGuard.js
-      ├─ ctfChannels.js
-      ├─ ctftimeApi.js
-      ├─ ctftimeNotifier.js
-      ├─ githubFetcher.js
-      ├─ cariChannel.js
-      ├─ getMabarChannel.js
-      ├─ getTargetChannel.js
-      ├─ kirimKeChannel.js
-      ├─ logActivity.js
-      ├─ permissionGuard.js
-      ├─ buatId.js
-      └─ sheet.js
+📁 📌 WELCOME & RULES (Public, Read-Only)
+   ├── 💬 #welcome          <-- Pesan sambutan & avatar member baru
+   ├── 💬 #rules            <-- Peraturan server
+   └── 💬 #ambil-role       <-- Panel tombol /rolepanel
+
+📁 💬 CHILL ZONE (Public)
+   ├── 💬 #general-chat     <-- Tempat nongkrong santai
+   ├── 💬 #media-meme       <-- Share foto, video & meme
+   └── 🔊 Chill Lounge      <-- Voice channel santai
+
+📁 🎯 MABAR & GAMING (Public)
+   ├── 💬 #ajak-mabar       <-- Channel teks janjian game
+   ├── 🔊 Mabar Room 1      <-- Voice mabar
+   └── 🔊 Mabar Room 2      <-- Voice mabar
+
+📁 🎉 BANSOS CORNER (Public, Read-Only)
+   ├── 💬 #bagi-akun        <-- Panel klaim akun gratis
+   └── 💬 #bagi-api         <-- Panel klaim API key gratis
+
+📁 🔒 ADMIN & HERMES (Private, Admin Only)
+   ├── 💬 #hermes-control   <-- Remote control Hermes di VPS
+   └── 💬 #bansos-manage    <-- Input stok & log klaim real-time
 ```
 
-## Instalasi
+---
 
+## 🚀 Panduan Deployment Docker di VPS
+
+### 1. Konfigurasi `.env`
+Salin template konfigurasi:
 ```bash
-npm init -y
-npm install discord.js dotenv
+cp .env.example .env
+nano .env
 ```
+Isi variabel yang diperlukan:
+* `TOKEN` & `CLIENT_ID`: Dari Discord Developer Portal.
+* `GUILD_ID`: ID Server Discord Anda (agar slash command langsung aktif tanpa jeda).
+* `ADMIN_CHANNEL_ID`: ID channel `#hermes-control`.
+* `BANSOS_LOG_CHANNEL_ID`: ID channel `#bansos-manage`.
+* `WELCOME_CHANNEL_ID`: ID channel `#welcome`.
+* `DEFAULT_ROLE_ID`: Role ID untuk member baru.
+* `ROLE_BANSOS_ID`: Role ID untuk bansos hunter.
+* `ROLE_GAMERS_ID`: Role ID untuk gamers.
+* `ADMIN_ROLE_IDS`: Role ID admin.
 
-Jika dependency sudah ada dari repository, cukup jalankan:
-
-```bash
-npm install
-```
-
-## Konfigurasi Environment
-
-Salin `.env.example` menjadi `.env`, lalu isi nilainya.
-
-```env
-TOKEN=ISI_TOKEN_BOT
-CLIENT_ID=1497290662196936744
-SHEET_WEBAPP_URL=ISI_URL_WEB_APP_GOOGLE_SCRIPT
-SHEET_SECRET=ISI_SECRET_YANG_SAMA_DENGAN_APPS_SCRIPT
-CHANNEL_CATATAN_ID=
-CHANNEL_TODO_ID=
-CHANNEL_LINK_ID=
-CHANNEL_JADWAL_ID=
-CHANNEL_MABAR_ID=
-CHANNEL_ARSIP_ID=
-CHANNEL_LOG_ID=
-
-# Opsional: role yang boleh memakai command sensitif (/hapus)
-ADMIN_ROLE_IDS=
-
-# Opsional: GitHub Personal Access Token untuk /tantangan (menghindari rate limit)
-GITHUB_TOKEN=
-```
-
-Catatan:
-
-- Jangan commit file `.env`.
-- `TOKEN` adalah token bot dari Discord Developer Portal.
-- `SHEET_WEBAPP_URL` adalah URL deploy Google Apps Script Web App.
-- `SHEET_SECRET` harus sama dengan Script Property `SECRET_KEY` di Google Apps Script.
-- Channel ID bersifat opsional. Jika kosong, bot akan mencari channel berdasarkan nama, misalnya `catatan`, `todo-list`, `link-penting`, `jadwal`, `mabar`, dan `arsip`.
-- Untuk `/mabar`, bot memprioritaskan channel yang namanya mengandung `info-mabar`. Jika tidak ada, bot memakai `CHANNEL_MABAR_ID`, lalu fallback ke `jadwal-mabar`, `mabar-chat`, atau `jadwal`.
-- `ADMIN_ROLE_IDS` opsional. Isi dengan satu atau beberapa role ID dipisahkan koma, misalnya `111,222`. Role ini boleh memakai `/hapus` selain user Administrator atau Manage Server.
-
-## Menjalankan Bot
-
-```bash
-node index.js
-```
-
-Atau:
-
-```bash
-npm start
-```
-
-Saat bot aktif, slash commands akan didaftarkan otomatis ke server tempat bot berada.
-
-## Fitur CTF
-
-Buat category CTF di Discord, lalu siapkan channel berikut:
-
-```text
-🧩 CTF
-├─ 🧩-ctf-info
-├─ 🤖-ctf-command
-├─ 🎯-ctf-target
-├─ 📝-ctf-writeup
-├─ 🔗-ctf-link
-├─ 🧠-ctf-notes
-└─ 🏆-ctf-progress
-```
-
-Command CTF bisa dipakai di channel yang namanya mengandung `ctf-command`, misalnya `🤖-ctf-command`. Command CTF juga boleh dipakai di channel/category bot command pribadi, misalnya channel `bot-command` atau category yang namanya mengandung `bot`.
-
-Di channel/category CTF, bot juga menolak command non-CTF seperti `/catat`, `/todo`, `/jadwal`, dan command umum lain. Jadi area CTF tetap bersih untuk workflow CTF.
-
-Data lomba diambil dari CTFtime public API, bukan scraping web dan tidak membutuhkan cookie/login CTFtime.
-
-Semua command CTF di area `ctf-command` bisa dipakai oleh member biasa selama mereka punya akses channel dan izin memakai slash command.
-
-### CTF Zone
-
-`🧩 CTF ZONE — NOVATRIA HQ`
-
-Channel ini khusus untuk belajar, tracking, dan dokumentasi CTF.
-
-Gunakan area CTF ini untuk:
-
-- Info lomba CTF.
-- Target/challenge yang sedang dikerjakan.
-- Writeup dan pembahasan.
-- Link platform CTF.
-- Notes command, payload, tools, dan hint.
-- Progress belajar.
-
-Rules CTF:
-
-- Hanya untuk platform CTF resmi, lab pribadi, dan target yang memang diizinkan.
-- Jangan menyerang website/server nyata tanpa izin.
-- Jangan share token, password, cookie, atau data sensitif.
-- Simpan catatan dan writeup dengan rapi.
-- Fokus belajar, latihan, dan dokumentasi.
-
-### Membatasi Slash Menu Di Category CTF
-
-Discord tidak mengizinkan bot token biasa mengubah visibilitas command per channel secara otomatis. Agar slash menu di category CTF benar-benar hanya menampilkan command CTF, atur dari Discord:
-
-1. Buka **Server Settings**.
-2. Pilih **Integrations**.
-3. Pilih aplikasi **Novatria Assistant** lalu klik **Manage**.
-4. Untuk channel/category CTF, nonaktifkan command non-CTF:
-   `/ping`, `/help`, `/status`, `/list`, `/hapus`, `/catat`, `/todo`, `/done`, `/link`, `/jadwal`, `/mabar`, `/arsip`.
-5. Biarkan command CTF aktif:
-   `/ctfevent`, `/ctfcek`, `/ctfnotify`, `/ctf`, `/tantangan`, `/writeup`, `/progress`.
-
-Kalau pengaturan visibility belum dilakukan di Discord, command non-CTF mungkin masih terlihat di slash menu, tetapi bot tetap akan menolaknya saat dipakai di area CTF.
-
-### Command CTF
-
-```text
-/ctfevent limit: 5
-```
-
-Menampilkan lomba CTF upcoming dari sekarang sampai 30 hari ke depan. Opsi `limit` bersifat opsional, default `5`, minimal `1`, maksimal `10`. Tanggal ditampilkan dalam timezone Asia/Jakarta/WIB.
-
-```text
-/ctfcek
-```
-
-Mengirim embed daftar lomba CTF upcoming ke channel tujuan. Bot mencari channel tujuan dengan prioritas nama `ctf-info`, lalu `ctf-lomba`, lalu channel yang mengandung `ctf`.
-
-```text
-/ctfnotify status: on
-/ctfnotify status: off
-```
-
-Mengaktifkan atau mematikan notifikasi otomatis H-3 CTFtime. Saat aktif, bot mengirim info lomba yang mulai dalam 3 hari ke depan ke channel CTF tanpa mengirim ulang event yang sama.
-
-Bot scan otomatis pada jam `00:00`, `08:00`, dan `17:00` WIB. Saat bot baru hidup atau sempat offline, bot juga langsung scan sekali setelah startup agar event H-3 yang terlewat tetap terdeteksi.
-
-Status notifikasi disimpan di `data/ctftime-settings.json`. Event H-3 yang sudah pernah dikirim disimpan di `data/ctftime-seen.json`. File JSON ini dibuat otomatis saat bot berjalan dan tidak perlu dicommit.
-
-```text
-/ctf nama: SQL Injection Lab platform: TryHackMe url: https://example.com kategori: web catatan: Fokus basic auth bypass
-```
-
-Menambahkan challenge CTF ke channel `🎯-ctf-target` dan menyimpannya sebagai `ctf_challenge` jika Google Sheet aktif.
-
-```text
-/writeup judul: SQL Injection Lab challenge: SQL Injection Lab ringkasan: Payload utama dan langkah exploit url: https://example.com/writeup
-```
-
-Menyimpan writeup ke channel `📝-ctf-writeup` dan menyimpannya sebagai `ctf_writeup` jika Google Sheet aktif.
-
-```text
-/progress challenge: SQL Injection Lab status: Sedang dikerjakan catatan: Sudah dapat endpoint login
-```
-
-Mengirim update progress ke channel `🏆-ctf-progress` dan menyimpannya sebagai `ctf_progress` jika Google Sheet aktif.
-
-```text
-/tantangan url: https://github.com/user/ctf-challenges/tree/main/web/sqli-basic judul: SQL Injection Basic hadiah: Rp500.000
-```
-
-Menambahkan tantangan dari GitHub ke channel `🧩-ctf-info`. Bot otomatis membaca file `.md` dan menampilkannya sebagai embed, serta mengirim file lainnya sebagai attachment. Opsi `judul` dan `hadiah` bersifat opsional.
-
-Untuk mencegah spam pada folder GitHub besar, `/tantangan` memproses maksimal 5 file markdown, 5 attachment, dan 10 chunk markdown. File yang dilewati akan dirangkum di channel.
-
-## Menjalankan Dengan Docker di Windows
-
-Pastikan Docker Desktop sudah terinstall dan berjalan. File `.env` tetap dipakai dari folder project dan tidak dimasukkan ke image Docker.
-
-Build dan jalankan bot:
-
+### 2. Jalankan dengan Docker Compose
 ```bash
 docker compose up -d --build
 ```
 
-Lihat log bot:
-
+### 3. Cek Log Container
 ```bash
 docker compose logs -f
 ```
 
-Restart bot:
+---
 
+## 🧪 Menjalankan Test Otomatis
 ```bash
-docker compose restart
+npm test
 ```
-
-Stop bot:
-
-```bash
-docker compose down
-```
-
-Container memakai `restart: unless-stopped`, jadi Docker akan menjalankan ulang bot otomatis setelah Docker Desktop aktif kembali.
-
-`docker-compose.yml` memount folder `./data` di host ke `/app/data` di container. File runtime seperti `ctftime-settings.json` dan `ctftime-seen.json` tetap aman saat container rebuild.
-
-### Auto Run Saat Laptop Menyala
-
-Cara paling mudah di Windows:
-
-1. Buka Docker Desktop.
-2. Masuk **Settings**.
-3. Aktifkan **Start Docker Desktop when you sign in**.
-4. Jalankan sekali:
-
-```bash
-docker compose up -d --build
-```
-
-Setelah itu, saat laptop menyala dan kamu login Windows, Docker Desktop akan start dan container `novatria-bot` akan hidup lagi otomatis.
-
-Repository ini menyediakan script Startup Folder untuk auto-run tanpa admin:
-
-```powershell
-powershell -ExecutionPolicy Bypass -File .\scripts\install-startup-folder.ps1
-```
-
-Untuk menghapus auto-run dari Startup Folder:
-
-```powershell
-powershell -ExecutionPolicy Bypass -File .\scripts\uninstall-startup-folder.ps1
-```
-
-## Permission Discord
-
-Pastikan bot punya permission berikut pada channel target:
-
-- View Channel
-- Send Messages
-- Use Application Commands
-
-Gunakan `/status` untuk mengecek apakah channel dan permission sudah benar.
-
-## Command Sensitif
-
-Command berikut hanya bisa digunakan oleh Administrator, user dengan permission Manage Server, atau role yang terdaftar di `ADMIN_ROLE_IDS`:
-
-- `/hapus`
-
-## Google Apps Script
-
-Bot mengirim data ke Google Sheet melalui POST request ke `SHEET_WEBAPP_URL`.
-
-Payload yang dikirim:
-
-```json
-{
-  "secret": "isi-secret-anda",
-  "action": "append",
-  "type": "catat",
-  "data": {
-    "id": "CAT-MABC1234-ABCD",
-    "user": "username#0000",
-    "userId": "123",
-    "server": "Novatria HQ",
-    "channel": "catatan",
-    "isi": "contoh catatan"
-  }
-}
-```
-
-Pastikan Apps Script:
-
-- Memiliki fungsi `doPost(e)`.
-- Memvalidasi `secret` dari Script Property `SECRET_KEY`.
-- Menyimpan, membaca, dan menghapus data berdasarkan `type`.
-- Mendukung action `update_status` untuk command `/done`.
-- Dideploy sebagai Web App.
-
-Kode lengkap Apps Script tersedia di `google-apps-script.js`. Apps Script mendukung sheet `Catatan`, `Todo`, `Link`, `Jadwal`, `Mabar`, `Arsip`, `CTF Challenge`, `CTF Writeup`, `CTF Progress`, `CTF Tantangan`, dan `Log`. Jika memakai fitur `/status`, `/list`, `/hapus`, `/done`, `/mabar`, dan command CTF, paste ulang isi file itu ke Google Apps Script lalu deploy versi Web App terbaru.
-
-Sheet CTF baru:
-
-- `CTF Challenge` untuk `/ctf`.
-- `CTF Writeup` untuk `/writeup`.
-- `CTF Progress` untuk `/progress`.
-- `CTF Tantangan` untuk `/tantangan`.
-
-### Setup Script Properties
-
-Di Google Apps Script, buka **Project Settings** lalu tambahkan Script Properties berikut:
-
-```text
-SECRET_KEY=isi-secret-anda
-SPREADSHEET_ID=id-google-sheet-anda
-```
-
-Nilai `SECRET_KEY` harus sama dengan `SHEET_SECRET` di `.env`. Setelah mengubah Script Properties atau kode Apps Script, deploy ulang sebagai **New version**.
-
-## Command Contoh
-
-```text
-/ping
-/help
-/status
-/list tipe: Todo limit: 10
-/list tipe: CTF Challenge limit: 5
-/hapus tipe: Todo id: TODO-MABC1234-ABCD
-/hapus tipe: CTF Challenge id: CTF-MABC1234-ABCD
-/catat isi: test catatan
-/todo tugas: belajar discord bot
-/done id: TODO-MABC1234-ABCD
-/link url: https://example.com judul: Contoh catatan: testing link
-/jadwal judul: Meeting jam: 20:00 selesai: 21:00 catatan: bahas bot hari ini
-/jadwal judul: Meeting jam: 20:00 tanggal: 25 bulan: 4 tahun: 2026 selesai: 21:00 catatan: bahas bot
-/mabar game: Mobile Legends jam: 20:00 catatan: push rank hari ini
-/mabar game: Mobile Legends tanggal: 30 bulan: 4 tahun: 2026 jam: 20:00 catatan: push rank
-/arsip isi: dokumen penting testing
-/ctfevent limit: 5
-/ctfcek
-/ctfnotify status: on
-/ctf nama: SQL Injection Lab platform: TryHackMe kategori: web catatan: latihan auth bypass
-/tantangan url: https://github.com/user/ctf-challenges/tree/main/web/sqli judul: SQL Injection hadiah: Sertifikat
-/writeup judul: SQL Injection Lab challenge: SQL Injection Lab ringkasan: payload dan step exploit
-/progress challenge: SQL Injection Lab status: Sedang dikerjakan catatan: sudah dapat hint pertama
-```
-
-## Catatan Keamanan
-
-Jika token bot pernah terlihat di terminal, chat, atau commit, segera regenerate token dari Discord Developer Portal dan perbarui `.env`.
+Menggunakan native Node.js test runner bawaan dengan 9 unit & integration tests mencakup transaksi SQLite, izin command, dan eksekusi Hermes.
