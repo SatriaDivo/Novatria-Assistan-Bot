@@ -2,26 +2,25 @@ services:
   novatria-bot:
     build:
       context: .
+      dockerfile: Dockerfile
     container_name: novatria-bot
-    env_file:
-      - .env
-    volumes:
-      - ./data:/app/data
     restart: unless-stopped
     init: true
+    env_file:
+      - .env
+    environment:
+      - NODE_ENV=production
+      - TZ=Asia/Jakarta
+    volumes:
+      # Data persisten SQLite database (bansos, logs, status)
+      - ./data:/app/data
+      # Opsional: Jika ingin bot mengakses socket/daemon docker di host:
+      # - /var/run/docker.sock:/var/run/docker.sock:ro
+    # Mengizinkan container mengakses localhost VPS host via host.docker.internal (jika Hermes menggunakan HTTP API)
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     logging:
       driver: json-file
       options:
         max-size: "10m"
         max-file: "3"
-
-  novatria-clear-global:
-    build:
-      context: .
-    env_file:
-      - .env
-    restart: "no"
-    init: true
-    command: npm run clear:global
-    profiles:
-      - tools
