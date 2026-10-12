@@ -1,6 +1,9 @@
 const { isAdmin } = require("../utils/permissionGuard");
 const { replyError, replySuccess, createEmbed } = require("../utils/replyEmbed");
 const hermesService = require("../services/hermesService");
+const { setPersona, getCurrentPersona } = require("../services/hermesChatService");
+const { sendBackup } = require("../services/backupService");
+const config = require("../config");
 
 async function execute(interaction) {
   if (!isAdmin(interaction)) {
@@ -77,6 +80,40 @@ async function execute(interaction) {
         interaction,
         "Gagal Me-restart",
         `Terjadi kendala saat restart service:\n\`\`\`bash\n${result.stderr || result.stdout}\n\`\`\``
+      );
+    }
+  }
+
+  if (subcommand === "mode") {
+    const personaKey = interaction.options.getString("persona");
+    const persona = setPersona(personaKey);
+
+    return replySuccess(
+      interaction,
+      "Persona Hermes Diperbarui",
+      `Mode Hermes AI di <#${config.channels.hermesChat}> berhasil diubah ke:\n` +
+        `**${persona.name}**\n` +
+        `*${persona.description}*`
+    );
+  }
+
+  if (subcommand === "backup") {
+    const targetChannel =
+      interaction.guild.channels.cache.get(config.channels.bansosLog) ||
+      interaction.channel;
+
+    const success = await sendBackup(targetChannel);
+    if (success) {
+      return replySuccess(
+        interaction,
+        "Backup Database Berhasil",
+        `Snapshot file \`database.sqlite\` telah dikirim ke <#${targetChannel.id}>!`
+      );
+    } else {
+      return replyError(
+        interaction,
+        "Backup Gagal",
+        "Gagal membuat snapshot database. Pastikan file database ada dan bot memiliki izin mengirim lampiran."
       );
     }
   }
