@@ -4,6 +4,13 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 .DS_Store
-google-apps-script.local.js
+
+# SQLite Database & logs
+data/*.sqlite
+data/*.sqlite-wal
+data/*.sqlite-shm
 data/*.json
+test/*.sqlite
+test/*.sqlite-wal
+test/*.sqlite-shm
 !data/.gitkeep

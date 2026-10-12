@@ -6,5 +6,6 @@ yarn-error.log*
 .gitignore
 .env
 .env.*
-google-apps-script.local.js
-README.md
+test
+docs
+data/*.sqlite*

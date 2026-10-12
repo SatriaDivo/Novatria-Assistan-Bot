@@ -2,109 +2,145 @@
   <img src="assets/logo.png" alt="Novatria Assistant Bot Logo" width="180">
 </p>
 
-# Novatria Assistant Bot (Overhauled v2.0)
+# Novatria Assistant Bot (v2.0.0)
 
 [![Node.js](https://img.shields.io/badge/Node.js-20.x-339933?logo=node.js&logoColor=white)](https://nodejs.org/)
 [![discord.js](https://img.shields.io/badge/discord.js-v14-5865F2?logo=discord&logoColor=white)](https://discord.js.org/)
 [![SQLite](https://img.shields.io/badge/SQLite-better--sqlite3-003B57?logo=sqlite&logoColor=white)](https://github.com/WiseLibs/better-sqlite3)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-Novatria Assistant Bot adalah bot Discord modern, ultra-ringan, dan cepat yang dirancang untuk:
-1. **Remote Control Hermes di VPS** langsung dari Discord (`/hermes status`, `/hermes cmd`, `/hermes restart`).
-2. **Sistem Bansos Akun & API Key Otomatis** dengan database SQLite atomik (anti-rebutan/anti-race condition) dan pengiriman credential secara *Ephemeral* (rahasia).
-3. **Komunitas & Gaming** (Auto-role, Welcome greeting, dan Self-Role interaktif via tombol).
+**Novatria Assistant Bot v2.0.0** adalah bot Discord ultra-ringan, cepat, dan aman yang dirancang untuk kebutuhan server komunitas, gaming, pembagian akun/API gratis (bansos), serta manajemen remote host VPS Hermes langsung dari Discord.
 
 ---
 
 ## ⚡ Fitur Utama
 
-### 👑 1. Hermes VPS Controller (Khusus Admin)
-* `/hermes status` — Cek status daemon Hermes, uptime VPS, dan pemakaian RAM.
-* `/hermes cmd <command>` — Jalankan perintah CLI di VPS dengan batas waktu aman (10 detik) dan output terpotong otomatis.
-* `/hermes restart` — Kirim perintah restart daemon Hermes ke `systemd`.
+### 👑 1. Remote Controller Hermes VPS (Admin Only)
+Kelola daemon Hermes dan pantau server VPS langsung dari Discord channel `#hermes-control`:
+* `/hermes status` — Melihat status daemon Hermes (`active`/`inactive`), sistem operasi, uptime VPS, dan kapasitas memori RAM yang terpakai.
+* `/hermes cmd <command>` — Menjalankan perintah terminal/shell di VPS secara aman dengan timeout 10 detik dan pemotongan output otomatis jika melebihi batas pesan Discord.
+* `/hermes restart` — Mengirim instruksi restart service daemon Hermes ke `systemd`.
 
-### 🎁 2. Sistem Bansos Akun & API Key
-* `/bansos add <tipe> <label> <konten>` — Tambahkan stok akun atau API key ke database (Admin).
-* `/bansos stock` — Cek sisa kuota stok yang tersedia vs yang sudah diklaim.
-* `/bansos drop <tipe> [channel]` — Kirim panel embed interaktif ke channel bansos:
-  * Tombol `[🎁 Klaim Akun Gratis]`
-  * Tombol `[🔑 Klaim API Key]`
+### 🎁 2. Sistem Bansos Akun & API Key Otomatis
+Distribusi akun premium dan API key gratis secara instan, aman, dan anti-rebutan:
+* `/bansos add <tipe> <label> <konten>` — Menambahkan stok akun (Canva, Spotify, VPN) atau API Key (OpenAI, DeepSeek, Groq) ke database SQLite (Admin).
+* `/bansos stock` — Menampilkan ringkasan sisa stok yang tersedia vs yang sudah diklaim.
+* `/bansos drop <tipe> [channel]` — Mengirim panel embed interaktif berisi tombol klaim langsung ke channel publik:
+  * `[🎁 Klaim Akun Gratis]`
+  * `[🔑 Klaim API Key]`
 * **Fitur Keamanan Bansos:**
-  * Transaksi atomik SQLite (`better-sqlite3` WAL mode): Aman saat ratusan user menekan tombol bersamaan.
-  * Credential dikirimkan secara **Ephemeral** (hanya terlihat oleh orang yang menekan tombol).
-  * Pembatasan 1 klaim per user per kategori.
-  * Notifikasi log otomatis ke channel `#bansos-manage`.
+  * **Atomik SQLite (`better-sqlite3`)**: Menggunakan database transaksi ACID tunggal; mencegah *race condition* atau duplikasi klaim meskipun ratusan user mengklik tombol bersamaan.
+  * **Pesan Rahasia (Ephemeral)**: Detail login akun / string API key hanya dikirimkan ke pengguna yang mengklik tombol dan tidak terlihat oleh orang lain di channel.
+  * **Anti-Timbun**: Pembatasan 1 kali klaim per pengguna per kategori.
+  * **Log Real-time**: Rekap klaim otomatis dikirim ke channel log admin (`#bansos-manage`).
 
-### 🌟 3. Komunitas & Self-Role
-* **Welcome Message & Auto-Role**: Menyambut member baru di `#welcome` dan otomatis memberikan role default `Member`.
-* `/rolepanel [channel]` — Mengirim panel tombol untuk mengambil role sendiri:
-  * `[🎁 Bansos Hunter]` (Notifikasi drop bansos)
-  * `[🎮 Gamers / Mabar]` (Ajakan main bareng)
+### 🌟 3. Komunitas, Auto-Role & Self-Role
+* **Sistem Welcome**: Otomatis menyambut member baru di channel `#welcome` dengan kartu avatar dan panduan server.
+* **Auto-Role**: Memberikan role default `Member` secara otomatis saat pengguna pertama kali bergabung.
+* `/rolepanel [channel]` — Mengirim panel tombol self-role interaktif di channel `#ambil-role`:
+  * `[🎁 Bansos Hunter]` (Role notifikasi drop bansos)
+  * `[🎮 Gamers / Mabar]` (Role notifikasi ajakan mabar)
 
 ---
 
-## 📁 Susunan Channel Server Discord yang Disarankan
+## 📁 Struktur Kategori & Channel Server Discord
+
+Untuk pengalaman terbaik, susun channel Discord Anda sebagai berikut:
 
 ```text
 📁 📌 WELCOME & RULES (Public, Read-Only)
-   ├── 💬 #welcome          <-- Pesan sambutan & avatar member baru
-   ├── 💬 #rules            <-- Peraturan server
-   └── 💬 #ambil-role       <-- Panel tombol /rolepanel
+   ├── 💬 #welcome          <-- Pesan sambutan otomatis & avatar member
+   ├── 💬 #rules            <-- Peraturan & pedoman komunitas
+   └── 💬 #ambil-role       <-- Panel tombol self-role (/rolepanel)
 
 📁 💬 CHILL ZONE (Public)
-   ├── 💬 #general-chat     <-- Tempat nongkrong santai
-   ├── 💬 #media-meme       <-- Share foto, video & meme
+   ├── 💬 #general-chat     <-- Tempat ngobrol santai antar member
+   ├── 💬 #media-meme       <-- Share gambar, video, dan meme
    └── 🔊 Chill Lounge      <-- Voice channel santai
 
 📁 🎯 MABAR & GAMING (Public)
-   ├── 💬 #ajak-mabar       <-- Channel teks janjian game
-   ├── 🔊 Mabar Room 1      <-- Voice mabar
-   └── 🔊 Mabar Room 2      <-- Voice mabar
+   ├── 💬 #ajak-mabar       <-- Channel teks koordinasi & janjian game
+   ├── 🔊 Mabar Room 1      <-- Voice channel gaming 1
+   └── 🔊 Mabar Room 2      <-- Voice channel gaming 2
 
 📁 🎉 BANSOS CORNER (Public, Read-Only)
-   ├── 💬 #bagi-akun        <-- Panel klaim akun gratis
-   └── 💬 #bagi-api         <-- Panel klaim API key gratis
+   ├── 💬 #bagi-akun        <-- Panel embed klaim akun gratis
+   └── 💬 #bagi-api         <-- Panel embed klaim API key gratis
 
 📁 🔒 ADMIN & HERMES (Private, Admin Only)
-   ├── 💬 #hermes-control   <-- Remote control Hermes di VPS
-   └── 💬 #bansos-manage    <-- Input stok & log klaim real-time
+   ├── 💬 #hermes-control   <-- Remote control Hermes & VPS (/hermes)
+   └── 💬 #bansos-manage    <-- Input stok bansos & notifikasi klaim
 ```
 
 ---
 
-## 🚀 Panduan Deployment Docker di VPS
+## 🚀 Panduan Deployment
 
-### 1. Konfigurasi `.env`
-Salin template konfigurasi:
-```bash
-cp .env.example .env
-nano .env
-```
-Isi variabel yang diperlukan:
-* `TOKEN` & `CLIENT_ID`: Dari Discord Developer Portal.
-* `GUILD_ID`: ID Server Discord Anda (agar slash command langsung aktif tanpa jeda).
-* `ADMIN_CHANNEL_ID`: ID channel `#hermes-control`.
-* `BANSOS_LOG_CHANNEL_ID`: ID channel `#bansos-manage`.
-* `WELCOME_CHANNEL_ID`: ID channel `#welcome`.
-* `DEFAULT_ROLE_ID`: Role ID untuk member baru.
-* `ROLE_BANSOS_ID`: Role ID untuk bansos hunter.
-* `ROLE_GAMERS_ID`: Role ID untuk gamers.
-* `ADMIN_ROLE_IDS`: Role ID admin.
+### Cara 1: Menggunakan Docker & Docker Compose (Direkomendasikan di VPS)
 
-### 2. Jalankan dengan Docker Compose
-```bash
-docker compose up -d --build
-```
+1. **Clone repository dan siapkan konfigurasi:**
+   ```bash
+   cp .env.example .env
+   nano .env
+   ```
+   Isi konfigurasi sesuai channel & role ID server Discord Anda.
 
-### 3. Cek Log Container
-```bash
-docker compose logs -f
-```
+2. **Jalankan container:**
+   ```bash
+   docker compose up -d --build
+   ```
+
+3. **Cek status & log:**
+   ```bash
+   docker compose logs -f
+   ```
+
+*Data SQLite tersimpan persisten di folder `./data` di host VPS.*
 
 ---
 
-## 🧪 Menjalankan Test Otomatis
+### Cara 2: Menjalankan Langsung dengan Node.js
+
+1. **Pastikan Node.js v20+ sudah terinstal.**
+2. **Install dependensi:**
+   ```bash
+   npm install
+   ```
+3. **Isi file `.env`:**
+   ```bash
+   cp .env.example .env
+   ```
+4. **Jalankan bot:**
+   ```bash
+   npm start
+   ```
+
+---
+
+## ⚙️ Variabel Konfigurasi (`.env`)
+
+| Variabel | Keterangan |
+|---|---|
+| `TOKEN` | Token Bot dari Discord Developer Portal |
+| `CLIENT_ID` | Application ID Bot |
+| `GUILD_ID` | ID Server Discord (agar slash command instan terdaftar) |
+| `ADMIN_CHANNEL_ID` | ID Channel `#hermes-control` |
+| `BANSOS_LOG_CHANNEL_ID` | ID Channel `#bansos-manage` |
+| `WELCOME_CHANNEL_ID` | ID Channel `#welcome` |
+| `BANSOS_CHANNEL_ID` | ID Channel `#bagi-akun` |
+| `DEFAULT_ROLE_ID` | Role ID default yang diberikan ke member baru |
+| `ROLE_BANSOS_ID` | Role ID untuk Bansos Hunter |
+| `ROLE_GAMERS_ID` | Role ID untuk Gamers / Mabar |
+| `ADMIN_ROLE_IDS` | Role ID admin yang berwenang (pisahkan koma jika >1) |
+| `HERMES_SERVICE_NAME` | Nama systemd service Hermes di VPS (default: `hermes`) |
+
+---
+
+## 🧪 Pengujian Otomatis (Unit & Integration Tests)
+
+Jalankan rangkaian pengujian bawaan tanpa library pihak ketiga tambahan:
 ```bash
 npm test
 ```
-Menggunakan native Node.js test runner bawaan dengan 9 unit & integration tests mencakup transaksi SQLite, izin command, dan eksekusi Hermes.
+
+Semua pengujian memverifikasi integritas database SQLite, alur klaim bansos, permission guard, dan service Hermes.
