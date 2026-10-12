@@ -7,6 +7,7 @@ const createInteractionHandler = require("./src/handlers/interactionCreate");
 const handleGuildMemberAdd = require("./src/events/guildMemberAdd");
 const handleGuildMemberRemove = require("./src/events/guildMemberRemove");
 const { updateMemberStats } = require("./src/services/statsService");
+const { callHermesAPI, splitMessage } = require("./src/services/hermesChatService");
 
 // Inisialisasi Database SQLite & Services
 const db = initDatabase();
@@ -17,6 +18,8 @@ const client = new Client({
   intents: [
     GatewayIntentBits.Guilds,
     GatewayIntentBits.GuildMembers, // Dibutuhkan untuk event member join & auto-role
+    GatewayIntentBits.GuildMessages, // Dibutuhkan untuk membaca pesan di channel
+    GatewayIntentBits.MessageContent, // Dibutuhkan untuk membaca isi teks pesan
   ],
 });
 
@@ -65,6 +68,63 @@ client.once("ready", async (readyClient) => {
 client.on("interactionCreate", interactionCreate);
 client.on("guildMemberAdd", handleGuildMemberAdd);
 client.on("guildMemberRemove", handleGuildMemberRemove);
+
+// Direct Chat dengan Hermes AI Agent di #hermes-chat
+client.on("messageCreate", async (message) => {
+  // Abaikan pesan dari bot
+  if (message.author.bot) return;
+
+  // Cek apakah pesan berada di channel #hermes-chat
+  if (message.channel.id === config.channels.hermesChat) {
+    const userPrompt = message.content.trim();
+    if (!userPrompt) return;
+
+    try {
+      await message.channel.sendTyping();
+
+      // Ambil histori percakapan sebelumnya untuk memori multi-turn
+      const fetched = await message.channel.messages.fetch({ limit: 8 });
+      const history = [];
+
+      // Urutkan dari pesan lama ke baru
+      const sorted = Array.from(fetched.values()).reverse();
+      for (const m of sorted) {
+        if (!m.content.trim()) continue;
+        if (m.author.id === client.user.id) {
+          history.push({ role: "assistant", content: m.content });
+        } else if (!m.author.bot) {
+          history.push({ role: "user", content: `${m.author.username}: ${m.content}` });
+        }
+      }
+
+      // Pastikan pesan terbaru tercatat
+      if (history.length === 0 || history[history.length - 1].content !== `${message.author.username}: ${userPrompt}`) {
+        history.push({ role: "user", content: `${message.author.username}: ${userPrompt}` });
+      }
+
+      // Typing loop selama Hermes sedang berpikir/men-generate
+      const typingInterval = setInterval(() => {
+        message.channel.sendTyping().catch(() => null);
+      }, 6000);
+
+      try {
+        const reply = await callHermesAPI(history);
+        clearInterval(typingInterval);
+
+        const chunks = splitMessage(reply);
+        for (const chunk of chunks) {
+          await message.channel.send(chunk);
+        }
+      } catch (apiErr) {
+        clearInterval(typingInterval);
+        console.error("Hermes Chat API Error:", apiErr);
+        await message.reply(`❌ **Hermes Error:** ${apiErr.message}`);
+      }
+    } catch (err) {
+      console.error("MessageCreate Handler Error:", err);
+    }
+  }
+});
 
 // Graceful Shutdown
 function handleShutdown() {

@@ -28,7 +28,7 @@ function executeCommand(cmd, timeoutMs = 10000) {
 async function checkServiceActive(serviceName) {
   // Hanya bisa mengecek systemctl di OS berbasis Linux/Unix
   if (process.platform === "win32") {
-    return false;
+    return true;
   }
 
   const result = await executeCommand(`systemctl is-active ${serviceName}`);

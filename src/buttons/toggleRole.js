@@ -12,12 +12,15 @@ async function handleToggleRole(interaction) {
   let roleId = null;
   let roleName = "";
 
-  if (interaction.customId === "btn_role_bansos") {
+  if (interaction.customId === "btn_role_bansos" || interaction.customId === "role_btn_notif_bansos") {
     roleId = config.roles.bansosHunter;
     roleName = "Bansos Hunter";
-  } else if (interaction.customId === "btn_role_gamers") {
+  } else if (interaction.customId === "btn_role_gamers" || interaction.customId === "role_btn_gamers") {
     roleId = config.roles.gamers;
     roleName = "Gamers / Mabar";
+  } else if (interaction.customId === "role_btn_member") {
+    roleId = config.roles.defaultMember;
+    roleName = "Member Komunitas";
   }
 
   if (!roleId) {
