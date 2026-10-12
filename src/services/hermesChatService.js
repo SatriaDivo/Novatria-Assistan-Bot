@@ -99,10 +99,41 @@ async function callHermesAPI(conversationMessages) {
             return reject(new Error(`API Error HTTP ${res.statusCode}: ${data}`));
           }
           try {
-            const parsed = JSON.parse(data);
-            const reply =
-              parsed.choices?.[0]?.message?.content || "(Tidak ada output teks)";
-            resolve(reply);
+            const trimmed = data.trim();
+            if (trimmed.startsWith("{")) {
+              const parsed = JSON.parse(trimmed);
+              const reply =
+                parsed.choices?.[0]?.message?.content || "(Tidak ada output teks)";
+              return resolve(reply);
+            }
+
+            // Fallback untuk SSE / Streaming format (data: {...})
+            const sseChunks = [];
+            const lines = trimmed.split("\n");
+            for (const line of lines) {
+              const trimmedLine = line.trim();
+              if (trimmedLine.startsWith("data:")) {
+                const jsonStr = trimmedLine.slice(5).trim();
+                if (jsonStr === "[DONE]") break;
+                try {
+                  const chunkObj = JSON.parse(jsonStr);
+                  const content =
+                    chunkObj.choices?.[0]?.delta?.content ||
+                    chunkObj.choices?.[0]?.message?.content ||
+                    "";
+                  if (content) sseChunks.push(content);
+                } catch (_) {}
+              }
+            }
+
+            if (sseChunks.length > 0) {
+              return resolve(sseChunks.join(""));
+            }
+
+            if (trimmed.length > 0) {
+              return resolve(trimmed);
+            }
+            resolve("(Tidak ada output teks)");
           } catch (e) {
             reject(new Error(`Gagal mem-parse respon: ${e.message}`));
           }
