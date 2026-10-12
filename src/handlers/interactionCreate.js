@@ -2,9 +2,14 @@ const hermes = require("../commands/hermes");
 const createBansosCommand = require("../commands/bansos");
 const rolepanel = require("../commands/rolepanel");
 const stats = require("../commands/stats");
+const mabar = require("../commands/mabar");
+const ticket = require("../commands/ticket");
+
 const handleClaimAccount = require("../buttons/claimAccount");
 const handleClaimApi = require("../buttons/claimApi");
 const handleToggleRole = require("../buttons/toggleRole");
+const handleMabarButton = require("../buttons/mabarButtons");
+const handleTicketButton = require("../buttons/ticketButtons");
 const { createEmbed } = require("../utils/replyEmbed");
 
 function createInteractionHandler(bansosService) {
@@ -15,6 +20,8 @@ function createInteractionHandler(bansosService) {
     bansos,
     rolepanel,
     stats,
+    mabar,
+    ticket,
   };
 
   return async function interactionCreate(interaction) {
@@ -53,16 +60,27 @@ function createInteractionHandler(bansosService) {
     if (interaction.isButton()) {
       const { customId } = interaction;
 
+      // Bansos Claims
       if (customId === "btn_claim_account") {
         return handleClaimAccount(interaction, bansosService);
       }
-
       if (customId === "btn_claim_api") {
         return handleClaimApi(interaction, bansosService);
       }
 
+      // Self-Roles
       if (customId === "btn_role_bansos" || customId === "btn_role_gamers") {
         return handleToggleRole(interaction);
+      }
+
+      // Mabar Party
+      if (customId.startsWith("btn_mabar_")) {
+        return handleMabarButton(interaction);
+      }
+
+      // Support Tickets
+      if (customId.startsWith("btn_ticket_")) {
+        return handleTicketButton(interaction);
       }
     }
   };

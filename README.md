@@ -28,20 +28,20 @@ Distribusi akun premium dan API key gratis secara instan, aman, dan anti-rebutan
 * `/bansos drop <tipe> [channel]` — Mengirim panel embed interaktif berisi tombol klaim langsung ke channel publik:
   * `[🎁 Klaim Akun Gratis]`
   * `[🔑 Klaim API Key]`
-* **Fitur Keamanan Bansos:**
+* **Fitur Keamanan & Notifikasi Bansos:**
+  * **Anti-Raid / Akun Baru Guard**: Memverifikasi umur akun Discord (minimal 3 hari secara default); akun baru/bot ditolak otomatis.
+  * **Notifikasi Feed Otomatis**: Otomatis mengirim pemberitahuan mention `@Bansos Hunter` di `#bansos-feed` setiap ada drop baru.
   * **Atomik SQLite (`better-sqlite3`)**: Menggunakan database transaksi ACID tunggal; mencegah *race condition* atau duplikasi klaim meskipun ratusan user mengklik tombol bersamaan.
   * **Pesan Rahasia (Ephemeral)**: Detail login akun / string API key hanya dikirimkan ke pengguna yang mengklik tombol dan tidak terlihat oleh orang lain di channel.
   * **Anti-Timbun**: Pembatasan 1 kali klaim per pengguna per kategori.
   * **Log Real-time**: Rekap klaim otomatis dikirim ke channel log admin (`#bansos-manage`).
 
-### 🌟 3. Komunitas, Welcome Card & Dynamic Server Stats
+### 🌟 3. Komunitas, Gaming & Support Desk
+* **Interactive Mabar Coordinator (`/mabar`)**: Membuat ajakan main game favorit dengan slot interaktif (contoh: 2/5 pemain), tombol `[🟢 Ikut Mabar]` / `[🔴 Batal]`, dan live-update player list.
+* **In-House Support Ticket (`/ticket panel`)**: Tombol `[📩 Buka Tiket Bantuan]` yang membuat private channel otomatis untuk member berkonsultasi langsung dengan Admin, dilengkapi tombol `[🔒 Tutup Tiket]`.
 * **Welcome Card Bergambar Otomatis**: Menyambut member baru di channel `#welcome` dengan kartu grafis selamat datang (PNG 800x360) berisi avatar member, nama, dan nomor urut member server.
-* **Auto-Role**: Memberikan role default `Member` secara otomatis saat pengguna pertama kali bergabung.
-* `/rolepanel [channel]` — Mengirim panel tombol self-role interaktif di channel `#ambil-role`:
-  * `[🎁 Bansos Hunter]` (Role notifikasi drop bansos)
-  * `[🎮 Gamers / Mabar]` (Role notifikasi ajakan mabar)
-* `/stats setup` — Membuat channel voice terkunci otomatis di paling atas server (`👥 Total Member: X`) sebagai counter member real-time (Admin).
-* `/stats sync` — Sinkronkan ulang jumlah member terkini ke channel stats.
+* **Dynamic Server Stats (`/stats setup` & `/stats sync`)**: Counter member otomatis real-time di channel voice terkunci paling atas server.
+* **Auto-Role & Self-Role (`/rolepanel`)**: Auto-role `Member` dan self-role `Bansos Hunter` / `Gamers`.
 
 ---
 

@@ -102,6 +102,54 @@ const commands = [
     .addSubcommand((sub) =>
       sub.setName("sync").setDescription("Sinkronkan ulang jumlah member ke channel stats")
     ),
+
+  // 5. Interactive Mabar Coordinator
+  new SlashCommandBuilder()
+    .setName("mabar")
+    .setDescription("Ajak teman server untuk mabar game favoritmu")
+    .addStringOption((opt) =>
+      opt
+        .setName("game")
+        .setDescription("Nama game (contoh: Mobile Legends, Valorant, Dota 2)")
+        .setRequired(true)
+    )
+    .addIntegerOption((opt) =>
+      opt
+        .setName("slot")
+        .setDescription("Jumlah maksimal pemain (2 - 10)")
+        .setMinValue(2)
+        .setMaxValue(10)
+        .setRequired(true)
+    )
+    .addStringOption((opt) =>
+      opt
+        .setName("jam")
+        .setDescription("Jam atau waktu main (contoh: 20:00 WIB, Sekarang)")
+        .setRequired(false)
+    )
+    .addStringOption((opt) =>
+      opt
+        .setName("catatan")
+        .setDescription("Catatan tambahan (contoh: Rank Gold, have fun)")
+        .setRequired(false)
+    ),
+
+  // 6. In-House Support Ticket
+  new SlashCommandBuilder()
+    .setName("ticket")
+    .setDescription("Kelola sistem tiket bantuan (Admin Only)")
+    .addSubcommand((sub) =>
+      sub
+        .setName("panel")
+        .setDescription("Kirim panel tombol buka tiket bantuan")
+        .addChannelOption((opt) =>
+          opt
+            .setName("channel")
+            .setDescription("Channel tujuan penempatan panel tiket")
+            .addChannelTypes(ChannelType.GuildText)
+            .setRequired(false)
+        )
+    ),
 ];
 
 module.exports = commands;
