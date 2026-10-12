@@ -1,120 +1,69 @@
-const ping = require("../commands/ping");
-const help = require("../commands/help");
-const status = require("../commands/status");
-const list = require("../commands/list");
-const hapus = require("../commands/hapus");
-const catat = require("../commands/catat");
-const todo = require("../commands/todo");
-const done = require("../commands/done");
-const link = require("../commands/link");
-const jadwal = require("../commands/jadwal");
-const mabar = require("../commands/mabar");
-const arsip = require("../commands/arsip");
-const ctfevent = require("../commands/ctfevent");
-const ctfcek = require("../commands/ctfcek");
-const ctfnotify = require("../commands/ctfnotify");
-const ctf = require("../commands/ctf");
-const writeup = require("../commands/writeup");
-const progress = require("../commands/progress");
-const tantangan = require("../commands/tantangan");
-const interrupter = require("../commands/interrupter");
-const logActivity = require("../utils/logActivity");
-const { isCtfArea, isCtfCommandName } = require("../utils/ctfChannelGuard");
+const hermes = require("../commands/hermes");
+const createBansosCommand = require("../commands/bansos");
+const rolepanel = require("../commands/rolepanel");
+const handleClaimAccount = require("../buttons/claimAccount");
+const handleClaimApi = require("../buttons/claimApi");
+const handleToggleRole = require("../buttons/toggleRole");
 const { createEmbed } = require("../utils/replyEmbed");
 
-const commandHandlers = {
-  ping,
-  help,
-  status,
-  list,
-  hapus,
-  catat,
-  todo,
-  done,
-  link,
-  jadwal,
-  mabar,
-  arsip,
-  ctfevent,
-  ctfcek,
-  ctfnotify,
-  ctf,
-  writeup,
-  progress,
-  tantangan,
-  interrupter,
-};
+function createInteractionHandler(bansosService) {
+  const bansos = createBansosCommand(bansosService);
 
-async function interactionCreate(interaction) {
-  if (!interaction.isChatInputCommand()) return;
-
-  const handler = commandHandlers[interaction.commandName];
-
-  if (!handler) {
-    return interaction.reply({
-      content: "❌ Command tidak dikenal.",
-      flags: 64,
-    });
-  }
-
-  if (isCtfArea(interaction.channel) && !isCtfCommandName(interaction.commandName)) {
-    return interaction.reply({
-      content:
-        "❌ Di kategori CTF, gunakan command CTF saja: `/ctfevent`, `/ctfcek`, `/ctfnotify`, `/ctf`, `/writeup`, `/progress`, atau `/tantangan`.",
-      flags: 64,
-    });
-  }
-
-  let activityStatus = "Berhasil";
-  let activityMessage = "Command selesai diproses.";
-  const originalEditReply = interaction.editReply.bind(interaction);
-
-  interaction.editReply = async (options) => {
-    const content = typeof options === "string" ? options : options?.content;
-    const firstEmbed = typeof options === "object" ? options?.embeds?.[0]?.data : null;
-    const embedSummary = [firstEmbed?.title, firstEmbed?.description].filter(Boolean).join(" - ");
-    const replySummary = content || embedSummary;
-
-    if (replySummary) {
-      activityMessage = replySummary;
-
-      if (replySummary.trim().startsWith("❌")) {
-        activityStatus = "Gagal";
-      }
-    }
-
-    return originalEditReply(options);
+  const commandHandlers = {
+    hermes,
+    bansos,
+    rolepanel,
   };
 
-  try {
-    // Discord butuh respons awal cepat. Defer dulu agar command tidak timeout.
-    await interaction.deferReply({ flags: 64 });
-    await handler.execute(interaction);
-    await logActivity(interaction, activityStatus, activityMessage);
-  } catch (error) {
-    console.error(`Error command /${interaction.commandName}:`, error);
-    await logActivity(interaction, "Gagal", error.message || "Error tidak diketahui");
+  return async function interactionCreate(interaction) {
+    // 1. Handle Slash Command
+    if (interaction.isChatInputCommand()) {
+      const handler = commandHandlers[interaction.commandName];
 
-    const message = {
-      embeds: [
-        createEmbed(
-          "error",
-          "❌ Command gagal",
-          `Terjadi error saat menjalankan command: ${error.message || "Error tidak diketahui"}`
-        ),
-      ],
-    };
-
-    try {
-      if (interaction.deferred || interaction.replied) {
-        await interaction.editReply(message);
-      } else {
-        await interaction.reply({ ...message, flags: 64 });
+      if (!handler) {
+        return interaction.reply({
+          content: "❌ Command tidak dikenal.",
+          ephemeral: true,
+        });
       }
-    } catch (replyError) {
-      console.error("Gagal mengirim pesan error:", replyError);
+
+      try {
+        await interaction.deferReply({ ephemeral: true });
+        await handler.execute(interaction);
+      } catch (error) {
+        console.error(`Error command /${interaction.commandName}:`, error);
+        const errEmbed = createEmbed(
+          "error",
+          "❌ Terjadi Kesalahan",
+          `Gagal memproses command: ${error.message || "Error tidak diketahui"}`
+        );
+
+        if (interaction.deferred || interaction.replied) {
+          await interaction.editReply({ embeds: [errEmbed] }).catch(() => null);
+        } else {
+          await interaction.reply({ embeds: [errEmbed], ephemeral: true }).catch(() => null);
+        }
+      }
+      return;
     }
-  }
+
+    // 2. Handle Button Interactions
+    if (interaction.isButton()) {
+      const { customId } = interaction;
+
+      if (customId === "btn_claim_account") {
+        return handleClaimAccount(interaction, bansosService);
+      }
+
+      if (customId === "btn_claim_api") {
+        return handleClaimApi(interaction, bansosService);
+      }
+
+      if (customId === "btn_role_bansos" || customId === "btn_role_gamers") {
+        return handleToggleRole(interaction);
+      }
+    }
+  };
 }
 
-module.exports = interactionCreate;
+module.exports = createInteractionHandler;
