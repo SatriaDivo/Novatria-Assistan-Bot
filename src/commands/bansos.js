@@ -4,6 +4,7 @@ const {
   ButtonStyle,
   EmbedBuilder,
 } = require("discord.js");
+const config = require("../config");
 const { isAdmin } = require("../utils/permissionGuard");
 const { replyError, replySuccess, createEmbed } = require("../utils/replyEmbed");
 
@@ -115,6 +116,32 @@ function createBansosCommand(bansosService) {
           const row = new ActionRowBuilder().addComponents(button);
 
           await targetChannel.send({ embeds: [embed], components: [row] });
+        }
+
+        // Broadcast Notifikasi ke channel bansos-feed dengan mention @Bansos Hunter
+        if (config.channels.bansosFeed) {
+          const feedChannel = interaction.guild.channels.cache.get(
+            config.channels.bansosFeed
+          );
+          if (feedChannel) {
+            const roleMention = config.roles.bansosHunter
+              ? `<@&${config.roles.bansosHunter}>`
+              : "@everyone";
+
+            const feedEmbed = new EmbedBuilder()
+              .setColor(tipe === "account" ? 0x3fb950 : 0x58a6ff)
+              .setTitle(`🚨 DROP BANSOS BARU: ${tipe === "account" ? "Akun Gratis" : "API Key"}`)
+              .setDescription(
+                `Halo ${roleMention}! Drop bansos baru telah dibuka di channel <#${targetChannel.id}>!\n` +
+                  `Segera meluncur dan klik tombol klaim sebelum kehabisan!`
+              )
+              .setTimestamp();
+
+            await feedChannel.send({
+              content: `🚨 **Pemberitahuan Drop Baru:** ${roleMention}`,
+              embeds: [feedEmbed],
+            }).catch(() => null);
+          }
         }
 
         return replySuccess(

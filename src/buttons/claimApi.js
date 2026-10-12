@@ -1,8 +1,18 @@
 const { EmbedBuilder } = require("discord.js");
 const config = require("../config");
+const { isAccountOldEnough } = require("../utils/antiRaidGuard");
 
 async function handleClaimApi(interaction, bansosService) {
   try {
+    // 1. Anti-Raid: Periksa umur akun Discord
+    const ageCheck = isAccountOldEnough(interaction.user);
+    if (!ageCheck.allowed) {
+      return interaction.reply({
+        content: `❌ **Klaim Ditolak:** Akun Discord kamu baru berumur **${ageCheck.ageDays} hari**. Minimal umur akun untuk mengklaim bansos adalah **${ageCheck.requiredDays} hari** untuk mencegah multi-account / bot!`,
+        ephemeral: true,
+      });
+    }
+
     const item = bansosService.claimItem(interaction.user.id, "api");
 
     const embed = new EmbedBuilder()
