@@ -21,6 +21,26 @@ const commands = [
     )
     .addSubcommand((sub) =>
       sub.setName("restart").setDescription("Restart service/daemon Hermes di host VPS")
+    )
+    .addSubcommand((sub) =>
+      sub.setName("backup").setDescription("Buat snapshot dan unduh backup database SQLite sekarang")
+    )
+    .addSubcommand((sub) =>
+      sub
+        .setName("mode")
+        .setDescription("Ganti persona AI agent Hermes di channel #hermes-chat")
+        .addStringOption((opt) =>
+          opt
+            .setName("persona")
+            .setDescription("Pilihan mode persona")
+            .setRequired(true)
+            .addChoices(
+              { name: "⚡ Unrestricted Agent (Default)", value: "unrestricted" },
+              { name: "🧑‍💻 Senior Full-Stack Engineer", value: "coder" },
+              { name: "🛡️ Offensive Security & Pentester", value: "cybersec" },
+              { name: "📚 Deep Technical Researcher", value: "researcher" }
+            )
+        )
     ),
 
   // 2. Manajemen Bansos Akun & API
@@ -56,6 +76,22 @@ const commands = [
     )
     .addSubcommand((sub) =>
       sub.setName("stock").setDescription("Lihat sisa kuota stok bansos yang tersedia")
+    )
+    .addSubcommand((sub) =>
+      sub
+        .setName("history")
+        .setDescription("Lihat riwayat audit klaim bansos (Admin Only)")
+        .addUserOption((opt) =>
+          opt.setName("user").setDescription("Filter berdasarkan user").setRequired(false)
+        )
+        .addIntegerOption((opt) =>
+          opt
+            .setName("limit")
+            .setDescription("Jumlah riwayat (1 - 25)")
+            .setMinValue(1)
+            .setMaxValue(25)
+            .setRequired(false)
+        )
     )
     .addSubcommand((sub) =>
       sub

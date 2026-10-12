@@ -8,6 +8,9 @@ const handleGuildMemberAdd = require("./src/events/guildMemberAdd");
 const handleGuildMemberRemove = require("./src/events/guildMemberRemove");
 const { updateMemberStats } = require("./src/services/statsService");
 const { callHermesAPI, splitMessage } = require("./src/services/hermesChatService");
+const { scanMessage } = require("./src/services/autoModService");
+const { sendBackup } = require("./src/services/backupService");
+const { EmbedBuilder } = require("discord.js");
 
 // Inisialisasi Database SQLite & Services
 const db = initDatabase();
@@ -59,6 +62,14 @@ client.once("ready", async (readyClient) => {
     for (const guild of readyClient.guilds.cache.values()) {
       await updateMemberStats(guild).catch(() => null);
     }
+
+    // Scheduler Backup Otomatis Setiap 24 Jam
+    setInterval(async () => {
+      const backupChannel = readyClient.channels.cache.get(config.channels.bansosLog);
+      if (backupChannel) {
+        await sendBackup(backupChannel).catch(() => null);
+      }
+    }, 24 * 60 * 60 * 1000);
   } catch (error) {
     console.error("Gagal mendaftarkan slash commands:", error);
   }
@@ -69,12 +80,47 @@ client.on("interactionCreate", interactionCreate);
 client.on("guildMemberAdd", handleGuildMemberAdd);
 client.on("guildMemberRemove", handleGuildMemberRemove);
 
-// Direct Chat dengan Hermes AI Agent di #hermes-chat
+// Direct Chat dengan Hermes AI Agent di #hermes-chat & Auto-Mod
 client.on("messageCreate", async (message) => {
   // Abaikan pesan dari bot
   if (message.author.bot) return;
 
-  // Cek apakah pesan berada di channel #hermes-chat
+  // 1. Auto-Moderasi Anti-Scam & Phishing
+  const modResult = scanMessage(message.content, message.member);
+  if (modResult.flagged) {
+    await message.delete().catch(() => null);
+
+    const warnMsg = await message.channel
+      .send(
+        `⚠️ <@${message.author.id}>, pesanmu dihapus otomatis: **${modResult.reason}**.`
+      )
+      .catch(() => null);
+
+    if (warnMsg) {
+      setTimeout(() => warnMsg.delete().catch(() => null), 6000);
+    }
+
+    if (config.channels.bansosLog) {
+      const logChannel = message.guild?.channels.cache.get(config.channels.bansosLog);
+      if (logChannel) {
+        const logEmbed = new EmbedBuilder()
+          .setColor(0xf85149)
+          .setTitle("🛡️ Auto-Mod: Pesan Berbahaya Dihapus")
+          .setDescription(
+            `**Pelanggar:** <@${message.author.id}> (${message.author.tag})\n` +
+              `**Channel:** <#${message.channel.id}>\n` +
+              `**Alasan:** ${modResult.reason}\n` +
+              `**Isi Pesan:**\n\`\`\`text\n${message.content.slice(0, 500)}\n\`\`\``
+          )
+          .setTimestamp();
+
+        await logChannel.send({ embeds: [logEmbed] }).catch(() => null);
+      }
+    }
+    return;
+  }
+
+  // 2. Cek apakah pesan berada di channel #hermes-chat
   if (message.channel.id === config.channels.hermesChat) {
     const userPrompt = message.content.trim();
     if (!userPrompt) return;

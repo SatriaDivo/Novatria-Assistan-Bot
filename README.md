@@ -15,20 +15,30 @@
 
 ## ⚡ Fitur Utama
 
-### 👑 1. Remote Controller Hermes VPS (Admin Only)
-Kelola daemon Hermes dan pantau server VPS langsung dari Discord channel `#hermes-control`:
+### 👑 1. Remote Controller Hermes VPS & AI Chat (Admin Only)
+Kelola daemon Hermes, ajak chat AI, dan pantau server VPS langsung dari Discord:
+* **Direct AI Chat (`#hermes-chat`)**: Mengobrol langsung dengan Hermes Autonomous Agent dengan memori percakapan multi-turn, typing indicator, dan auto-splitter.
 * `/hermes status` — Melihat status daemon Hermes (`active`/`inactive`), sistem operasi, uptime VPS, dan kapasitas memori RAM yang terpakai.
 * `/hermes cmd <command>` — Menjalankan perintah terminal/shell di VPS secara aman dengan timeout 10 detik dan pemotongan output otomatis jika melebihi batas pesan Discord.
 * `/hermes restart` — Mengirim instruksi restart service daemon Hermes ke `systemd`.
+* `/hermes backup` — Membuat snapshot instan database SQLite (`database.sqlite`) dan mengunggahnya ke channel admin.
+* `/hermes mode <persona>` — Mengubah persona AI Hermes secara instan:
+  * ⚡ **Unrestricted Agent** (Default autonomous mode)
+  * 🧑‍💻 **Senior Full-Stack Engineer** (Fokus arsitektur & coding)
+  * 🛡️ **Offensive Security & Pentester** (Audit keamanan & exploit analysis)
+  * 📚 **Deep Technical Researcher** (Sintesis data & riset mendalam)
 
 ### 🎁 2. Sistem Bansos Akun & API Key Otomatis
 Distribusi akun premium dan API key gratis secara instan, aman, dan anti-rebutan:
 * `/bansos add <tipe> <label> <konten>` — Menambahkan stok akun (Canva, Spotify, VPN) atau API Key (OpenAI, DeepSeek, Groq) ke database SQLite (Admin).
 * `/bansos stock` — Menampilkan ringkasan sisa stok yang tersedia vs yang sudah diklaim.
+* `/bansos history [user] [limit]` — Menampilkan audit riwayat klaim member lengkap dengan timestamp dan credential (Admin).
 * `/bansos drop <tipe> [channel]` — Mengirim panel embed interaktif berisi tombol klaim langsung ke channel publik:
   * `[🎁 Klaim Akun Gratis]`
   * `[🔑 Klaim API Key]`
 * **Fitur Keamanan & Notifikasi Bansos:**
+  * **Auto-Moderasi Anti-Scam**: Otomatis mendeteksi dan menghapus link fake nitro, phishing, dan invite server ilegal di channel publik.
+  * **Auto-Backup 24 Jam**: Setiap 24 jam bot secara otomatis mengunggah backup `database.sqlite` ke channel `#bansos-manage`.
   * **Anti-Raid / Akun Baru Guard**: Memverifikasi umur akun Discord (minimal 3 hari secara default); akun baru/bot ditolak otomatis.
   * **Notifikasi Feed Otomatis**: Otomatis mengirim pemberitahuan mention `@Bansos Hunter` di `#bansos-feed` setiap ada drop baru.
   * **Atomik SQLite (`better-sqlite3`)**: Menggunakan database transaksi ACID tunggal; mencegah *race condition* atau duplikasi klaim meskipun ratusan user mengklik tombol bersamaan.
