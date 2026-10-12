@@ -64,7 +64,45 @@ function createBansosCommand(bansosService) {
         );
       }
 
-      // 3. Drop Panel Bansos ke Channel
+      // 3. Riwayat Klaim (Audit History)
+      if (subcommand === "history") {
+        const targetUser = interaction.options.getUser("user");
+        const limit = interaction.options.getInteger("limit") || 10;
+
+        const records = bansosService.getClaimHistory({
+          userId: targetUser?.id,
+          limit,
+        });
+
+        if (records.length === 0) {
+          return replySuccess(
+            interaction,
+            "Riwayat Klaim Kosong",
+            targetUser
+              ? `Pengguna <@${targetUser.id}> belum pernah mengklaim bansos apapun.`
+              : "Belum ada riwayat klaim bansos di database."
+          );
+        }
+
+        const listText = records
+          .map(
+            (r, i) =>
+              `**${i + 1}.** <@${r.user_id}> mengklaim **${r.label}** (${r.type})\n` +
+              `   • *Waktu:* ${r.claimed_at || "Baru saja"}\n` +
+              `   • *Credential:* \`||${r.content}||\``
+          )
+          .join("\n\n");
+
+        const embed = createEmbed(
+          "info",
+          "📋 Audit Riwayat Klaim Bansos",
+          `Menampilkan **${records.length}** riwayat klaim terakhir:\n\n${listText}`
+        );
+
+        return interaction.editReply({ embeds: [embed] });
+      }
+
+      // 4. Drop Panel Bansos ke Channel
       if (subcommand === "drop") {
         const tipe = interaction.options.getString("tipe");
         const targetChannel =

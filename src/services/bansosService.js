@@ -89,12 +89,34 @@ function createBansosService(db) {
     return claimTransaction(userId, type);
   }
 
+  function getClaimHistory({ userId, limit = 10 } = {}) {
+    let query = `
+      SELECT 
+        c.id, c.user_id, c.type, c.claimed_at,
+        i.label, i.content
+      FROM bansos_claims c
+      JOIN bansos_items i ON c.item_id = i.id
+    `;
+    const params = [];
+
+    if (userId) {
+      query += ` WHERE c.user_id = ? `;
+      params.push(userId);
+    }
+
+    query += ` ORDER BY c.id DESC LIMIT ? `;
+    params.push(limit);
+
+    return db.prepare(query).all(...params);
+  }
+
   return {
     addAccount,
     addApi,
     getStockSummary,
     hasUserClaimed,
     claimItem,
+    getClaimHistory,
   };
 }
 
