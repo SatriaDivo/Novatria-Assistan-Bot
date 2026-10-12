@@ -34,12 +34,14 @@ Distribusi akun premium dan API key gratis secara instan, aman, dan anti-rebutan
   * **Anti-Timbun**: Pembatasan 1 kali klaim per pengguna per kategori.
   * **Log Real-time**: Rekap klaim otomatis dikirim ke channel log admin (`#bansos-manage`).
 
-### 🌟 3. Komunitas, Auto-Role & Self-Role
-* **Sistem Welcome**: Otomatis menyambut member baru di channel `#welcome` dengan kartu avatar dan panduan server.
+### 🌟 3. Komunitas, Welcome Card & Dynamic Server Stats
+* **Welcome Card Bergambar Otomatis**: Menyambut member baru di channel `#welcome` dengan kartu grafis selamat datang (PNG 800x360) berisi avatar member, nama, dan nomor urut member server.
 * **Auto-Role**: Memberikan role default `Member` secara otomatis saat pengguna pertama kali bergabung.
 * `/rolepanel [channel]` — Mengirim panel tombol self-role interaktif di channel `#ambil-role`:
   * `[🎁 Bansos Hunter]` (Role notifikasi drop bansos)
   * `[🎮 Gamers / Mabar]` (Role notifikasi ajakan mabar)
+* `/stats setup` — Membuat channel voice terkunci otomatis di paling atas server (`👥 Total Member: X`) sebagai counter member real-time (Admin).
+* `/stats sync` — Sinkronkan ulang jumlah member terkini ke channel stats.
 
 ---
 

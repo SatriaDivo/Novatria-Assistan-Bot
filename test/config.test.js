@@ -9,6 +9,7 @@ test("config module loads required bot, channels, and role variables", () => {
   process.env.BANSOS_LOG_CHANNEL_ID = "234567";
   process.env.WELCOME_CHANNEL_ID = "345678";
   process.env.BANSOS_CHANNEL_ID = "456789";
+  process.env.STATS_MEMBER_CHANNEL_ID = "890123";
   process.env.DEFAULT_ROLE_ID = "567890";
   process.env.ROLE_BANSOS_ID = "678901";
   process.env.ROLE_GAMERS_ID = "789012";
@@ -25,6 +26,7 @@ test("config module loads required bot, channels, and role variables", () => {
   assert.strictEqual(config.channels.bansosLog, "234567");
   assert.strictEqual(config.channels.welcome, "345678");
   assert.strictEqual(config.channels.bansos, "456789");
+  assert.strictEqual(config.channels.statsMember, "890123");
   assert.strictEqual(config.roles.defaultMember, "567890");
   assert.strictEqual(config.roles.bansosHunter, "678901");
   assert.strictEqual(config.roles.gamers, "789012");

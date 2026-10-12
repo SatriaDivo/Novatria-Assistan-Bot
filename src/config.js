@@ -14,6 +14,7 @@ module.exports = {
     bansosLog: process.env.BANSOS_LOG_CHANNEL_ID,
     welcome: process.env.WELCOME_CHANNEL_ID,
     bansos: process.env.BANSOS_CHANNEL_ID,
+    statsMember: process.env.STATS_MEMBER_CHANNEL_ID,
   },
   roles: {
     defaultMember: process.env.DEFAULT_ROLE_ID,

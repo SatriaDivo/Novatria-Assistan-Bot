@@ -1,6 +1,7 @@
 const hermes = require("../commands/hermes");
 const createBansosCommand = require("../commands/bansos");
 const rolepanel = require("../commands/rolepanel");
+const stats = require("../commands/stats");
 const handleClaimAccount = require("../buttons/claimAccount");
 const handleClaimApi = require("../buttons/claimApi");
 const handleToggleRole = require("../buttons/toggleRole");
@@ -13,6 +14,7 @@ function createInteractionHandler(bansosService) {
     hermes,
     bansos,
     rolepanel,
+    stats,
   };
 
   return async function interactionCreate(interaction) {

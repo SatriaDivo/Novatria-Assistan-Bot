@@ -1,5 +1,7 @@
-const { EmbedBuilder } = require("discord.js");
+const { EmbedBuilder, AttachmentBuilder } = require("discord.js");
 const config = require("../config");
+const { generateWelcomeCard } = require("../utils/welcomeCard");
+const { updateMemberStats } = require("../services/statsService");
 
 async function handleGuildMemberAdd(member) {
   try {
@@ -13,10 +15,11 @@ async function handleGuildMemberAdd(member) {
       }
     }
 
-    // 2. Kirim pesan welcome ke channel welcome
+    // 2. Generate Welcome Card Gambar & Kirim ke Channel Welcome
     if (config.channels.welcome) {
       const welcomeChannel = member.guild.channels.cache.get(config.channels.welcome);
       if (welcomeChannel) {
+        let files = [];
         const embed = new EmbedBuilder()
           .setColor(0x5865f2)
           .setTitle(`🎉 Selamat Datang di ${member.guild.name}!`)
@@ -28,16 +31,31 @@ async function handleGuildMemberAdd(member) {
               `• Nongkrong dan ngobrol santai di channel general-chat.\n\n` +
               `Semoga betah dan seru-seruan bareng di sini!`
           )
-          .setThumbnail(member.user.displayAvatarURL({ dynamic: true, size: 256 }))
           .setFooter({ text: `Member #${member.guild.memberCount}` })
           .setTimestamp();
+
+        try {
+          const imageBuffer = await generateWelcomeCard(member);
+          const attachment = new AttachmentBuilder(imageBuffer, {
+            name: `welcome-${member.id}.png`,
+          });
+          embed.setImage(`attachment://welcome-${member.id}.png`);
+          files = [attachment];
+        } catch (err) {
+          console.warn("Gagal membuat gambar welcome card, fallback ke avatar:", err.message);
+          embed.setThumbnail(member.user.displayAvatarURL({ dynamic: true, size: 256 }));
+        }
 
         await welcomeChannel.send({
           content: `Selamat datang <@${member.id}>! 👋`,
           embeds: [embed],
+          files,
         });
       }
     }
+
+    // 3. Update Dynamic Server Stats Channel
+    await updateMemberStats(member.guild);
   } catch (error) {
     console.error("Error pada event guildMemberAdd:", error);
   }

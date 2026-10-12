@@ -5,6 +5,8 @@ const initDatabase = require("./src/db");
 const createBansosService = require("./src/services/bansosService");
 const createInteractionHandler = require("./src/handlers/interactionCreate");
 const handleGuildMemberAdd = require("./src/events/guildMemberAdd");
+const handleGuildMemberRemove = require("./src/events/guildMemberRemove");
+const { updateMemberStats } = require("./src/services/statsService");
 
 // Inisialisasi Database SQLite & Services
 const db = initDatabase();
@@ -49,6 +51,11 @@ client.once("ready", async (readyClient) => {
   try {
     console.log(`Bot berhasil login sebagai ${readyClient.user.tag}`);
     await registerCommands(readyClient);
+
+    // Sinkronkan counter member stats saat bot online
+    for (const guild of readyClient.guilds.cache.values()) {
+      await updateMemberStats(guild).catch(() => null);
+    }
   } catch (error) {
     console.error("Gagal mendaftarkan slash commands:", error);
   }
@@ -57,6 +64,7 @@ client.once("ready", async (readyClient) => {
 // Event Handlers
 client.on("interactionCreate", interactionCreate);
 client.on("guildMemberAdd", handleGuildMemberAdd);
+client.on("guildMemberRemove", handleGuildMemberRemove);
 
 // Graceful Shutdown
 function handleShutdown() {

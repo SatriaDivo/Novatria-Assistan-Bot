@@ -91,6 +91,17 @@ const commands = [
         .addChannelTypes(ChannelType.GuildText)
         .setRequired(false)
     ),
+
+  // 4. Setup Dynamic Server Stats
+  new SlashCommandBuilder()
+    .setName("stats")
+    .setDescription("Kelola channel statistik server (Admin Only)")
+    .addSubcommand((sub) =>
+      sub.setName("setup").setDescription("Buat channel voice statistik member otomatis di atas server")
+    )
+    .addSubcommand((sub) =>
+      sub.setName("sync").setDescription("Sinkronkan ulang jumlah member ke channel stats")
+    ),
 ];
 
 module.exports = commands;
