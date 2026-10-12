@@ -1,57 +1,81 @@
 const { Client, GatewayIntentBits, REST, Routes } = require("discord.js");
 const config = require("./src/config");
 const commands = require("./src/commands/definitions");
-const interactionCreate = require("./src/handlers/interactionCreate");
-const { startCtftimeNotifier } = require("./src/utils/ctftimeNotifier");
-const { handleVoiceStateUpdate } = require("./src/utils/interrupterService");
+const initDatabase = require("./src/db");
+const createBansosService = require("./src/services/bansosService");
+const createInteractionHandler = require("./src/handlers/interactionCreate");
+const handleGuildMemberAdd = require("./src/events/guildMemberAdd");
+
+// Inisialisasi Database SQLite & Services
+const db = initDatabase();
+const bansosService = createBansosService(db);
+const interactionCreate = createInteractionHandler(bansosService);
 
 const client = new Client({
-  intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildVoiceStates],
+  intents: [
+    GatewayIntentBits.Guilds,
+    GatewayIntentBits.GuildMembers, // Dibutuhkan untuk event member join & auto-role
+  ],
 });
 
-// Hapus semua slash command global lama milik aplikasi agar tidak dobel dengan command guild.
-async function clearGlobalCommands(rest) {
-  console.log("Menghapus global slash commands lama...");
-
-  await rest.put(Routes.applicationCommands(config.clientId), { body: [] });
-
-  console.log("Global slash commands lama berhasil dihapus.");
-}
-
-// Daftarkan slash commands ke setiap server agar langsung muncul.
+// Registrasi Slash Commands ke Discord API
 async function registerCommands(readyClient) {
   const rest = new REST({ version: "10" }).setToken(config.token);
-  const guilds = readyClient.guilds.cache;
-
-  await clearGlobalCommands(rest);
 
   console.log("Mendaftarkan slash commands...");
 
-  for (const guild of guilds.values()) {
-    await rest.put(Routes.applicationGuildCommands(config.clientId, guild.id), { body: commands });
-
-    console.log(`Slash commands berhasil didaftarkan di server: ${guild.name}`);
+  // Jika GUILD_ID ditentukan, daftarkan langsung ke server target (instan tanpa delay)
+  if (config.guildId) {
+    await rest.put(
+      Routes.applicationGuildCommands(config.clientId, config.guildId),
+      { body: commands }
+    );
+    console.log(`Slash commands berhasil didaftarkan di guild: ${config.guildId}`);
+  } else {
+    // Daftarkan ke semua server tempat bot berada
+    for (const guild of readyClient.guilds.cache.values()) {
+      await rest.put(
+        Routes.applicationGuildCommands(config.clientId, guild.id),
+        { body: commands }
+      );
+      console.log(`Slash commands berhasil didaftarkan di server: ${guild.name}`);
+    }
   }
 
-  console.log("Slash commands berhasil didaftarkan.");
+  console.log("Semua slash commands selesai didaftarkan.");
 }
 
-client.once("clientReady", async (readyClient) => {
+client.once("ready", async (readyClient) => {
   try {
+    console.log(`Bot berhasil login sebagai ${readyClient.user.tag}`);
     await registerCommands(readyClient);
-    startCtftimeNotifier(readyClient);
-    console.log(`Bot aktif sebagai ${readyClient.user.tag}`);
   } catch (error) {
     console.error("Gagal mendaftarkan slash commands:", error);
   }
 });
 
-// Semua slash command diproses di handler terpisah.
+// Event Handlers
 client.on("interactionCreate", interactionCreate);
+client.on("guildMemberAdd", handleGuildMemberAdd);
 
-// Handler untuk Voice State (Voice Interrupter)
-client.on("voiceStateUpdate", (oldState, newState) => {
-  handleVoiceStateUpdate(oldState, newState);
-});
+// Graceful Shutdown
+function handleShutdown() {
+  console.log("Menutup bot dan database connection...");
+  try {
+    db.close();
+    client.destroy();
+  } finally {
+    process.exit(0);
+  }
+}
 
-client.login(config.token);
+process.on("SIGINT", handleShutdown);
+process.on("SIGTERM", handleShutdown);
+
+if (config.token && config.token !== "ISI_TOKEN_BOT") {
+  client.login(config.token).catch((err) => {
+    console.error("Gagal login ke Discord:", err.message);
+  });
+} else {
+  console.warn("⚠️ Token bot belum diisi di .env! Silakan isi TOKEN terlebih dahulu.");
+}
